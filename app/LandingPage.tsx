@@ -1,9 +1,10 @@
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Link } from 'expo-router';
+import { Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import "./globals.css";
 
 
-export default function LandingPage({ navigation }: { navigation: any }) {
+export default function LandingPage()  {
   return (
     <SafeAreaView className="flex-1">
       <View className="flex-1 items-center px-6">
@@ -11,7 +12,7 @@ export default function LandingPage({ navigation }: { navigation: any }) {
         <View className="mt-10 mb-6">
           <Image
             className="w-16 h-16 "
-            source={require("../assets/logo.png")}
+            source={require("../assets/edubridge-logo.png")}
             resizeMode="contain"
           />
         </View>
@@ -40,13 +41,9 @@ export default function LandingPage({ navigation }: { navigation: any }) {
           />
         </View>
         {/* CTA */}
-        <TouchableOpacity
-          activeOpacity={0.85}
-          className="bg-blue-700 px-10 py-4 rounded-full shadow-md"
-          onPress={() => navigation.navigate("SignIn")}
-        >
-          <Text className="text-white font-bold text-base ">Get Started</Text>
-        </TouchableOpacity>
+        <Link href='/SignIn' className="bg-blue-700 px-10 py-4 rounded-full shadow-md text-white font-bold text-base">
+          Get Started
+        </Link>
       </View>
     </SafeAreaView>
   );
