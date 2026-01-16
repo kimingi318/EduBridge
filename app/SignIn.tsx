@@ -1,24 +1,22 @@
 import { Ionicons } from "@expo/vector-icons";
-import {
-  ImageBackground,
-  SafeAreaView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Link, router, } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { ImageBackground, Text, TextInput, TouchableOpacity, View, } from "react-native";
+import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
-export default function SignUp() {
+export default function SignIn() {
   return (
-    <SafeAreaView className="flex-1 pt-10 bg-white">
+    <View className="flex-1 ">
+      <StatusBar style='dark'/>
       {/* Header Image */}
       <ImageBackground
-        source={require("../assets/student-signin-img.jpg")}
-        className="h-[42%] w-full"
+        source={require("../assets/images/student-signin-img.jpg")}
+        className=" w-full"
+        style={{ height: hp(40) }}
         resizeMode="cover"
       >
         {/* Top Bar */}
-        <View className="flex-row justify-between items-center px-5 pt-4">
+        <View className="flex-row justify-between items-center px-5 " style={{ paddingTop: hp(6) }}>
           <View className="flex-row items-center space-x-2">
             <View className="bg-blue-600 p-2 rounded-lg">
               <Ionicons name="school-outline" size={18} color="white" />
@@ -40,9 +38,9 @@ export default function SignUp() {
 
         <Text className="text-gray-500 mb-6">
           or{" "}
-          <Text className="text-blue-600 font-semibold">
-            Sign in
-          </Text>
+          <Link href='/SignUp'><Text className="text-blue-600 font-semibold">
+            Sign Up
+          </Text></Link>
         </Text>
 
         {/* Inputs */}
@@ -114,10 +112,9 @@ export default function SignUp() {
         </Text>
 
         {/* Primary Button */}
-        <TouchableOpacity className="bg-blue-600 rounded-full py-4 mt-6 shadow-md shadow-blue-500/40">
-          <Text className="text-white text-center font-semibold text-base">
-            Agree & Join
-          </Text>
+        <TouchableOpacity  onPress ={() => router.push('/(tabs)/HomeScreen')}
+        className="bg-blue-600 rounded-full py-4 mt-6 shadow-md shadow-blue-500/40">
+          <Text className="text-white text-center font-semibold text-base">Agree & Join</Text>
         </TouchableOpacity>
 
         {/* Divider */}
@@ -135,6 +132,6 @@ export default function SignUp() {
           </Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
