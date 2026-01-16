@@ -1,14 +1,15 @@
-import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { Link } from 'expo-router';
+import React from 'react';
+import { Text, View } from 'react-native';
 
-const ForumScreen = () => {
+export default function ForumScreen() {
   return (
-    <View>
+    <View className='pt-10'>
       <Text>ForumScreen</Text>
+      <Link href='../LandingPage'>Back</Link>
     </View>
   )
 }
 
-export default ForumScreen
 
-const styles = StyleSheet.create({})
+

@@ -1,14 +1,13 @@
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 
-const MessageScreen = () => {
+export default function MessageScreen() {
   return (
-    <View>
+    <View className='pt-10'>
       <Text>MessageScreen</Text>
     </View>
   )
 }
 
-export default MessageScreen
 
-const styles = StyleSheet.create({})
+
