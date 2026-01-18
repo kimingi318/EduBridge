@@ -1,16 +1,38 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Link, router } from "expo-router";
+import GradientButton from "@/components/GradientButton";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Link, router, } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { ImageBackground, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, ImageBackground, Text, TextInput, TouchableOpacity, View, } from "react-native";
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import CustomKeyBoardView from "../components/customKeyBoardView";
+import EduLogo from "../components/EduLogo";
+import Loading from "../components/loading";
 
 export default function SignUp() {
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [regNo, setRegNo] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleSignup = async () => {
+    if (!email || !regNo || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+    //signup logic here
+  }
   return (
-    <View className='flex-1'>
-      <StatusBar style='light' />
+    <CustomKeyBoardView>
+      <StatusBar style='dark' />
+      {/* Header Image */}
       <ImageBackground
-        source={require("../assets/images/student-signup-img.jpg")}
+        source={require("../assets/images/student-signin-img.jpg")}
         className=" w-full"
         style={{ height: hp(40) }}
         resizeMode="cover"
@@ -19,26 +41,27 @@ export default function SignUp() {
         <View className="flex-row justify-between items-center px-5 " style={{ paddingTop: hp(6) }}>
           <View className="flex-row items-center space-x-2">
             <View className="bg-blue-600 p-2 rounded-lg">
-              <Ionicons name="school-outline" size={18} color="white" />
+              <EduLogo size={35} onPress={() => router.push('/LandingPage')} />
             </View>
             <Text className="text-blue-700 font-bold text-lg">
-              Edu <Text className="color-white">Bridge</Text>.
+              EduBridge.
             </Text>
           </View>
 
-          <Ionicons name="menu-outline" size={28} color="#fff" />
+          <Ionicons name="menu-outline" size={35} color="#000" />
         </View>
       </ImageBackground>
 
+      {/* White Card */}
       <View className="flex-1 bg-white rounded-t-3xl -mt-10 px-6 pt-6">
         <Text className="text-xl font-bold text-gray-900 mb-1">
-          Sign In
+          Join EduBridge
         </Text>
 
         <Text className="text-gray-500 mb-6">
           or{" "}
           <Link href='/SignIn'><Text className="text-blue-600 font-semibold">
-            Join EduBridge
+            Sign In
           </Text></Link>
         </Text>
 
@@ -49,8 +72,22 @@ export default function SignUp() {
               Email address*
             </Text>
             <TextInput
+              value={email}
+              onChangeText={setEmail}
               className="border-b border-gray-300 pb-2 text-gray-800"
               placeholder="example@email.com"
+            />
+          </View>
+
+          <View>
+            <Text className="text-xs text-gray-500 mb-1">
+              Registration No.*
+            </Text>
+            <TextInput
+              value={regNo}
+              onChangeText={setRegNo}
+              className="border-b border-gray-300 pb-2 text-gray-800"
+              placeholder="EB1/61275/22"
             />
           </View>
 
@@ -60,6 +97,8 @@ export default function SignUp() {
             </Text>
             <View className="flex-row items-center border-b border-gray-300">
               <TextInput
+                value={password}
+                onChangeText={setPassword}
                 secureTextEntry
                 className="flex-1 pb-2 text-gray-800"
                 placeholder="********"
@@ -73,19 +112,47 @@ export default function SignUp() {
           </View>
 
           <View>
-
+            <Text className="text-xs text-gray-500 mb-1">
+              Confirm Password*
+            </Text>
+            <View className="flex-row items-center border-b border-gray-300">
+              <TextInput
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                className="flex-1 pb-2 text-gray-800"
+                placeholder="********"
+              />
+              <Ionicons
+                name="eye-outline"
+                size={18}
+                color="#6B7280"
+              />
+            </View>
           </View>
         </View>
 
-
-        <Text className="text-xs text-gray-400 mt-6 leading-4">
+        {/* Terms */}
+        <Text className="text-xs text-gray-400 mt-6 mb-6 leading-4">
+          By clicking agree and join, you agree to the EduBridge{" "}
+          <Text className="text-blue-600">
+            User Agreement, privacy policy and cookie policy.
+          </Text>{" "}
+          For Email signup we will send verification code via email
         </Text>
 
         {/* Primary Button */}
-        <TouchableOpacity onPress={() => router.push('/(tabs)/HomeScreen')}
-          className="bg-blue-600 rounded-full py-4 mt-6 shadow-md shadow-blue-500/40">
-          <Text className="text-white text-center font-semibold text-base">Continue</Text>
-        </TouchableOpacity>
+        <View>
+          {loading ? (
+            <View className="flex-row justify-center">
+              <Loading size={hp(8)} />
+            </View>
+
+          ) : (
+            <GradientButton onPress={handleSignup}
+              title="Agree & Join" />
+          )}
+        </View>
 
         {/* Divider */}
         <View className="flex-row items-center my-6">
@@ -102,9 +169,6 @@ export default function SignUp() {
           </Text>
         </TouchableOpacity>
       </View>
-
-    </View>
-  )
+    </CustomKeyBoardView>
+  );
 }
-
-

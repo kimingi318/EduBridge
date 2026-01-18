@@ -1,16 +1,19 @@
-import { Link } from "expo-router";
-import { Image, Text, View } from "react-native";
+import { router } from "expo-router";
+import { StatusBar } from 'expo-status-bar';
+import { Text, View } from "react-native";
+import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import EduLogo from "../components/EduLogo";
+import GradientButton from "../components/GradientButton";
 import "./globals.css";
 
 export default function LandingPage() {
   return (
     <View className="flex-1 h-full p-6">
-      {/*Logo */}
-      <View className="mt-10 mb-10 rounded-lg items-center">
-        <Image
-          className="w-24 h-20 "
-          source={require("../assets/images/edubridge-logo.png")}
-          resizeMode="contain"
+      <StatusBar style = 'dark'/>
+            {/*Logo */}
+      <View style={{marginTop: hp(8), marginBottom: hp(4)}} className=" rounded-sm items-center">
+        <EduLogo
+          size={60}
         />
       </View>
       {/*Title */}
@@ -40,13 +43,14 @@ export default function LandingPage() {
         />
       </View>
       {/* CTA */}
-      <View className="items-center mt-[300px]">
-        <Link
-          href="/SignIn"
-          className="bg-blue-700 px-10 py-4 rounded-full shadow-md text-white font-bold text-base"
-        >
-          Get Started
-        </Link>
+      <View className="items-center" style={{marginTop: hp(14)}}>
+       <GradientButton
+       title="Get Started"
+       onPress={() => {
+        // Navigate to SignIn page
+        router.replace('/SignIn');
+       }}
+       />
       </View>
     </View>
   );
