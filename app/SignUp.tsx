@@ -1,13 +1,21 @@
 import GradientButton from "@/components/GradientButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Link, router, } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
-import { Alert, ImageBackground, Text, TextInput, TouchableOpacity, View, } from "react-native";
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { Link, router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { useState } from "react";
+import {
+  Alert,
+  ImageBackground,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import CustomKeyBoardView from "../components/customKeyBoardView";
 import EduLogo from "../components/EduLogo";
 import Loading from "../components/loading";
+import { useAuth } from "../context/authContext";
 
 export default function SignUp() {
   const [loading, setLoading] = useState(false);
@@ -15,6 +23,7 @@ export default function SignUp() {
   const [regNo, setRegNo] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { signUp } = useAuth();
 
   const handleSignup = async () => {
     if (!email || !regNo || !password || !confirmPassword) {
@@ -25,11 +34,18 @@ export default function SignUp() {
       Alert.alert("Error", "Passwords do not match.");
       return;
     }
-    //signup logic here
-  }
+    setLoading(true);
+    let response = await signUp(email, password, regNo);
+    setLoading(false);
+
+    // console.log('got results: ', response);
+    if (response?.error) {
+      Alert.alert("Error", response.error);
+    }
+  };
   return (
     <CustomKeyBoardView>
-      <StatusBar style='dark' />
+      <StatusBar style="dark" />
       {/* Header Image */}
       <ImageBackground
         source={require("../assets/images/student-signin-img.jpg")}
@@ -38,14 +54,15 @@ export default function SignUp() {
         resizeMode="cover"
       >
         {/* Top Bar */}
-        <View className="flex-row justify-between items-center px-5 " style={{ paddingTop: hp(6) }}>
+        <View
+          className="flex-row justify-between items-center px-5 "
+          style={{ paddingTop: hp(6) }}
+        >
           <View className="flex-row items-center space-x-2">
             <View className="bg-blue-600 p-2 rounded-lg">
-              <EduLogo size={35} onPress={() => router.push('/LandingPage')} />
+              <EduLogo size={35} onPress={() => router.push("/LandingPage")} />
             </View>
-            <Text className="text-blue-700 font-bold text-lg">
-              EduBridge.
-            </Text>
+            <Text className="text-blue-700 font-bold text-lg">EduBridge.</Text>
           </View>
 
           <Ionicons name="menu-outline" size={35} color="#000" />
@@ -60,17 +77,15 @@ export default function SignUp() {
 
         <Text className="text-gray-500 mb-6">
           or{" "}
-          <Link href='/SignIn'><Text className="text-blue-600 font-semibold">
-            Sign In
-          </Text></Link>
+          <Link href="/SignIn">
+            <Text className="text-blue-600 font-semibold">Sign In</Text>
+          </Link>
         </Text>
 
         {/* Inputs */}
         <View className="space-y-5">
           <View>
-            <Text className="text-xs text-gray-500 mb-1">
-              Email address*
-            </Text>
+            <Text className="text-xs text-gray-500 mb-1">Email address*</Text>
             <TextInput
               value={email}
               onChangeText={setEmail}
@@ -92,9 +107,7 @@ export default function SignUp() {
           </View>
 
           <View>
-            <Text className="text-xs text-gray-500 mb-1">
-              Password*
-            </Text>
+            <Text className="text-xs text-gray-500 mb-1">Password*</Text>
             <View className="flex-row items-center border-b border-gray-300">
               <TextInput
                 value={password}
@@ -103,11 +116,7 @@ export default function SignUp() {
                 className="flex-1 pb-2 text-gray-800"
                 placeholder="********"
               />
-              <Ionicons
-                name="eye-outline"
-                size={18}
-                color="#6B7280"
-              />
+              <Ionicons name="eye-outline" size={18} color="#6B7280" />
             </View>
           </View>
 
@@ -123,11 +132,7 @@ export default function SignUp() {
                 className="flex-1 pb-2 text-gray-800"
                 placeholder="********"
               />
-              <Ionicons
-                name="eye-outline"
-                size={18}
-                color="#6B7280"
-              />
+              <Ionicons name="eye-outline" size={18} color="#6B7280" />
             </View>
           </View>
         </View>
@@ -147,10 +152,8 @@ export default function SignUp() {
             <View className="flex-row justify-center">
               <Loading size={hp(8)} />
             </View>
-
           ) : (
-            <GradientButton onPress={handleSignup}
-              title="Agree & Join" />
+            <GradientButton onPress={handleSignup} title="Agree & Join" />
           )}
         </View>
 

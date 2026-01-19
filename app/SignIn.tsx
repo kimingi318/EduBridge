@@ -1,29 +1,44 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
-import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
-import { Alert, ImageBackground, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { StatusBar } from "expo-status-bar";
+import React, { useState } from "react";
+import {
+  Alert,
+  ImageBackground,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import CustomKeyBoardView from "../components/customKeyBoardView";
 import EduLogo from "../components/EduLogo";
 import GradientButton from "../components/GradientButton";
 import Loading from "../components/loading";
+import { useAuth } from "../context/authContext";
 
 export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { signIn } = useAuth();
 
   const handleSignin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
-    //signin logic here
-  }
+    setLoading(true);
+    const response = await signIn(email, password);
+    setLoading(false);
+    // console.log("got results: ", response);
+    if (!response.success) {
+      Alert.alert("Error", response.error);
+    }
+  };
   return (
     <CustomKeyBoardView>
-      <StatusBar style='light' />
+      <StatusBar style="light" />
       <ImageBackground
         source={require("../assets/images/student-signup-img.jpg")}
         className=" w-full"
@@ -31,10 +46,13 @@ export default function SignIn() {
         resizeMode="cover"
       >
         {/* Top Bar */}
-        <View className="flex-row justify-between items-center px-5 " style={{ paddingTop: hp(6) }}>
+        <View
+          className="flex-row justify-between items-center px-5 "
+          style={{ paddingTop: hp(6) }}
+        >
           <View className="flex-row items-center space-x-2">
             <View className="bg-blue-600 p-2 rounded-lg">
-              <EduLogo size={35} onPress={() => router.push('/LandingPage')} />
+              <EduLogo size={35} onPress={() => router.push("/LandingPage")} />
             </View>
             <Text className="text-blue-700 font-bold text-lg">
               Edu <Text className="color-white">Bridge</Text>.
@@ -46,23 +64,19 @@ export default function SignIn() {
       </ImageBackground>
 
       <View className="flex-1 bg-white rounded-t-3xl -mt-10 px-6 pt-6">
-        <Text className="text-xl font-bold text-gray-900 mb-1">
-          Sign Up
-        </Text>
+        <Text className="text-xl font-bold text-gray-900 mb-1">Sign Up</Text>
 
         <Text className="text-gray-500 mb-6">
           or{" "}
-          <Link href='/SignUp'><Text className="text-blue-600 font-semibold">
-            Join EduBridge
-          </Text></Link>
+          <Link href="/SignUp">
+            <Text className="text-blue-600 font-semibold">Join EduBridge</Text>
+          </Link>
         </Text>
 
         {/* Inputs */}
         <View className="space-y-5">
           <View>
-            <Text className="text-xs text-gray-500 mb-1">
-              Email address*
-            </Text>
+            <Text className="text-xs text-gray-500 mb-1">Email address*</Text>
             <TextInput
               value={email}
               onChangeText={setEmail}
@@ -72,9 +86,7 @@ export default function SignIn() {
           </View>
 
           <View>
-            <Text className="text-xs text-gray-500 mb-1">
-              Password*
-            </Text>
+            <Text className="text-xs text-gray-500 mb-1">Password*</Text>
             <View className="flex-row items-center border-b border-gray-300">
               <TextInput
                 value={password}
@@ -83,17 +95,12 @@ export default function SignIn() {
                 className="flex-1 pb-2 text-gray-800"
                 placeholder="********"
               />
-              <Ionicons
-                name="eye-outline"
-                size={18}
-                color="#6B7280"
-              />
+              <Ionicons name="eye-outline" size={18} color="#6B7280" />
             </View>
           </View>
         </View>
 
-        <Text className="text-xs text-gray-400 mt-6 leading-4">
-        </Text>
+        <Text className="text-xs text-gray-400 mt-6 leading-4"></Text>
 
         {/* Primary Button */}
         <View>
@@ -102,8 +109,7 @@ export default function SignIn() {
               <Loading size={hp(8)} />
             </View>
           ) : (
-            <GradientButton onPress={handleSignin}
-              title="Continue" />
+            <GradientButton onPress={handleSignin} title="Continue" />
           )}
         </View>
 
@@ -122,9 +128,6 @@ export default function SignIn() {
           </Text>
         </TouchableOpacity>
       </View>
-
     </CustomKeyBoardView>
-  )
+  );
 }
-
-
