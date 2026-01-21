@@ -1,3 +1,4 @@
+import { MenuItem } from "@/components/CustomeMenuItems";
 import GradientButton from "@/components/GradientButton";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Link, router } from "expo-router";
@@ -11,7 +12,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { Menu, MenuOptions, MenuTrigger } from "react-native-popup-menu";
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from "react-native-responsive-screen";
 import CustomKeyBoardView from "../components/customKeyBoardView";
 import EduLogo from "../components/EduLogo";
 import Loading from "../components/loading";
@@ -65,7 +70,41 @@ export default function SignUp() {
             <Text className="text-blue-700 font-bold text-lg">EduBridge.</Text>
           </View>
 
-          <Ionicons name="menu-outline" size={35} color="#000" />
+          <Menu>
+            <MenuTrigger
+              customStyles={{
+                triggerWrapper: {
+                  //trigger wrapper styles
+                },
+              }}
+            >
+              <Ionicons name="menu-outline" size={28} color="#000" />
+            </MenuTrigger>
+            <MenuOptions
+              customStyles={{
+                optionsContainer: {
+                  backgroundColor: "#07285E",
+                  borderRadius: 10,
+                  borderCurve: "continuous",
+                  marginTop: 30,
+                  marginLeft: -20,
+                  width: wp(25),
+                },
+              }}
+            >
+              <MenuItem
+                text="Lecturer"
+                action={() => router.push("/SignIn")}
+                value="Lecturer"
+              />
+              <Divider />
+              <MenuItem
+                text="Admin"
+                action={() => router.push("/SignIn")}
+                value="Admin"
+              />
+            </MenuOptions>
+          </Menu>
         </View>
       </ImageBackground>
 
@@ -175,3 +214,6 @@ export default function SignUp() {
     </CustomKeyBoardView>
   );
 }
+const Divider = () => {
+  return <View className="p-[1px] w-full bg-neutral-300" />;
+};

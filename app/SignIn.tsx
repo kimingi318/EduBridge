@@ -58,13 +58,11 @@ export default function SignIn() {
               Edu <Text className="color-white">Bridge</Text>.
             </Text>
           </View>
-
-          <Ionicons name="menu-outline" size={28} color="#fff" />
         </View>
       </ImageBackground>
 
       <View className="flex-1 bg-white rounded-t-3xl -mt-10 px-6 pt-6">
-        <Text className="text-xl font-bold text-gray-900 mb-1">Sign Up</Text>
+        <Text className="text-xl font-bold text-gray-900 mb-1">Sign In</Text>
 
         <Text className="text-gray-500 mb-6">
           or{" "}
