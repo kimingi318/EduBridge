@@ -11,7 +11,6 @@ export default function TabLayout() {
         tabBarInactiveTintColor: "#B0C4DE",
         tabBarStyle: { height: 60 },
         tabBarLabelStyle: { fontSize: 14 },
-
       }}
     >
       <Tabs.Screen
@@ -42,6 +41,7 @@ export default function TabLayout() {
         name="MessageScreen"
         options={{
           headerShown: false,
+          // header: () => <MsgHeader />,
           tabBarIcon: ({ color }) => (
             <Ionicons name="mail-outline" color={color} size={25} />
           ),
