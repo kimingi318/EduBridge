@@ -4,7 +4,15 @@ module.exports = {
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        edublue: "#1E5EFF",
+        edulightblue: "#E5EDFF",
+      },
+      fontSize: {
+        titles: "18px",
+      },
+    },
   },
   plugins: [],
-}
+};
