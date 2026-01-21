@@ -1,5 +1,6 @@
 import { Slot, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
+import { MenuProvider } from "react-native-popup-menu";
 import { AuthContextProvider, useAuth } from "../context/authContext";
 
 export function RootLayout() {
@@ -28,17 +29,10 @@ export function RootLayout() {
 
 export default function RootNavigator() {
   return (
-    <AuthContextProvider>
-      <RootLayout />
-    </AuthContextProvider>
-    // <Stack screenOptions={{ headerShown: false }}>
-    //   <Stack.Protected guard={!!session}>
-    //     <Stack.Screen name="(tabs)" />
-    //   </Stack.Protected>
-
-    //   <Stack.Protected guard={!session}>
-    //     <Stack.Screen name="SignIn" />
-    //   </Stack.Protected>
-    // </Stack>
+    <MenuProvider>
+      <AuthContextProvider>
+        <RootLayout />
+      </AuthContextProvider>
+    </MenuProvider>
   );
 }
