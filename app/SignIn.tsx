@@ -1,16 +1,18 @@
+import icons from "@/constants/icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   ImageBackground,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import CustomKeyBoardView from "../components/customKeyBoardView";
 import EduLogo from "../components/EduLogo";
 import GradientButton from "../components/GradientButton";
@@ -120,8 +122,8 @@ export default function SignIn() {
 
         {/* Google Button */}
         <TouchableOpacity className="border border-gray-300 rounded-full py-3 flex-row justify-center items-center space-x-2">
-          <Ionicons name="logo-google" size={18} color="#DB4437" />
-          <Text className="text-gray-700 font-medium">
+          <Image style={{height:hp(3), width: wp(6), marginRight:wp(2)}} source={icons.google}/>
+          <Text style={{fontSize: hp(2)}} className="text-gray-700 font-medium">
             Continue with Google
           </Text>
         </TouchableOpacity>

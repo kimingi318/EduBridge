@@ -1,11 +1,13 @@
 import { MenuItem } from "@/components/CustomeMenuItems";
 import GradientButton from "@/components/GradientButton";
+import icons from "@/constants/icons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Link, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   ImageBackground,
   Text,
   TextInput,
@@ -21,6 +23,7 @@ import CustomKeyBoardView from "../components/customKeyBoardView";
 import EduLogo from "../components/EduLogo";
 import Loading from "../components/loading";
 import { useAuth } from "../context/authContext";
+
 
 export default function SignUp() {
   const [loading, setLoading] = useState(false);
@@ -205,7 +208,7 @@ export default function SignUp() {
 
         {/* Google Button */}
         <TouchableOpacity className="border border-gray-300 rounded-full py-3 flex-row justify-center items-center space-x-2">
-          <Ionicons name="logo-google" size={18} color="#DB4437" />
+          <Image style={{height:hp(3), width: wp(6), marginRight:wp(2)}} source={icons.google}/>
           <Text className="text-gray-700 font-medium">
             Continue with Google
           </Text>
