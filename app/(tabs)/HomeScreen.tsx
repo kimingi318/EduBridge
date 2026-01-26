@@ -1,27 +1,32 @@
 import ScheduleCard from "@/components/schedule";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import SearchBar from "@/components/searchBar";
+import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
   ImageBackground,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { blurhash } from "../../utils/common";
 
 export default function HomeScreen() {
+  const router = useRouter();
+
+
   return (
-    <View className="flex-1 bg-darkBlue">
+    <SafeAreaView className="flex-1 ">
       <ImageBackground source={require("../../assets/images/main-bg-img.jpg")}>
-        <StatusBar style="light" />
+        <StatusBar style="light" backgroundColor="#000" />
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* HEADER */}
           <View
-            style={{ marginTop: hp(6) }}
+            style={{ marginTop: hp(4) }}
             className="px-5 flex-1 items-center pb-8 "
           >
             <View className="flex-row items-center justify-between">
@@ -41,10 +46,10 @@ export default function HomeScreen() {
                 </View>
 
                 <View>
-                  <Text className="text-white text-[32px] l font-SemiBold">
+                  <Text className="text-white text-[32px]  font-inter-bold">
                     Good morning, Peter
                   </Text>
-                  <Text className="text-blue-200 text-[22px] font-Regular">
+                  <Text className="text-blue-200 text-[22px] font-inter">
                     IV · Semester 1 · BSc IT
                   </Text>
                 </View>
@@ -52,16 +57,8 @@ export default function HomeScreen() {
             </View>
 
             {/* SEARCH */}
-            <View className="mt-6 bg-white rounded-full flex-row items-center px-4 py-3">
-              <Ionicons name="search" size={20} color="#6B7280" />
-              <TextInput
-                placeholder="Search classes, lecturers, rooms..."
-                className="flex-1 ml-2 text-gray-700"
-              />
-              <Ionicons name="mic-outline" size={20} color="#6B7280" />
-            </View>
+            <SearchBar />
           </View>
-
           {/* CONTENT */}
           <View className="bg-gray-100 -mt-6 rounded-t-[30px] px-5 pt-6">
             {/* TODAY'S SCHEDULE */}
@@ -87,7 +84,7 @@ export default function HomeScreen() {
                 <Text className="bg-edulightblue text-edublue px-4 py-1 rounded-full text-xs">
                   Social
                 </Text>
-                <Text className="text-edublue font-semibold">See all</Text>
+                <Text className="text-edublue font-semibold" onPress={()=> router.push("/NotificationScreen")}>See all</Text>
               </View>
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -129,7 +126,7 @@ export default function HomeScreen() {
             <View className="mt-4 mb-10">
               <View className="flex-row justify-between mb-3">
                 <Text className="text-titles font-bold">Memos</Text>
-                <Text className="text-edublue font-semibold">See all</Text>
+                  <Text className="text-edublue font-semibold" onPress={()=> router.push("/NotificationScreen")}>See all</Text>
               </View>
 
               <Memo
@@ -153,7 +150,7 @@ export default function HomeScreen() {
           </View>
         </ScrollView>
       </ImageBackground>
-    </View>
+    </SafeAreaView>
   );
 }
 /* MEMO COMPONENT */
