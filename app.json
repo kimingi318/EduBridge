@@ -4,7 +4,7 @@
     "slug": "EduBridge",
     "version": "1.0.0",
     "orientation": "portrait",
-
+    "icon": "./assets/images/edubridge-logo.png",
     "scheme": "edubridge",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,31 +13,46 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-
+        "backgroundImage": "./assets/images/edubridge-logo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-
+      "favicon": "./assets/images/edubridge-logo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "image": "./assets/images/edubridge-logo.png",
+          "resizeMode": "cover",
+          "backgroundColor": "#fff"
         }
       ],
-      "expo-font",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assest/fonts/Inter_18pt-Black.ttf",
+            "./assest/fonts/Inter_18pt-Bold.ttf",
+            "./assest/fonts/Inter_18pt-ExtraBold.ttf",
+            "./assest/fonts/Inter_18pt-Light.ttf",
+            "./assest/fonts/Inter_18pt-Medium.ttf",
+            "./assest/fonts/Inter_18pt-Regular.ttf",
+            "./assest/fonts/Inter_18pt-SemiBold.ttf",
+            "./assest/fonts/Inter_24pt-Black.ttf",
+            "./assest/fonts/Inter_24pt-Bold.ttf",
+            "./assest/fonts/Inter_24pt-ExtraBold.ttf",
+            "./assest/fonts/Inter_24pt-Light.ttf",
+            "./assest/fonts/Inter_24pt-Medium.ttf",
+            "./assest/fonts/Inter_24pt-Regular.ttf",
+            "./assest/fonts/Inter_24pt-SemiBold.ttf"
+          ]
+        }
+      ],
       "expo-web-browser"
     ],
     "experiments": {
