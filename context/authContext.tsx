@@ -1,3 +1,4 @@
+import { apiFetch } from "@/utils/api";
 import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -5,7 +6,7 @@ import {
   signInWithEmailAndPassword,
   type User,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import {
   createContext,
   useContext,
@@ -17,6 +18,7 @@ import { auth, db } from "../firebaseConfig"; // Adjust the import path as neces
 
 interface CustomUser extends User {
   regNo?: string;
+  role?: 'student'| 'lecturer'| 'admin'| 'council'
   userId?: string;
 }
 
@@ -46,7 +48,6 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       if (user) {
         setIsAuthenticating(true);
         setUser(user);
-        updateUserData(user.uid);
       } else {
         setIsAuthenticating(false);
         setUser(null);
@@ -54,21 +55,6 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
     });
     return unsub;
   }, []);
-
-  //function to get additional user data from firestore
-  const updateUserData = async (userId: string) => {
-    const userDoc = doc(db, "users", userId);
-
-    const docSnapshot = await getDoc(userDoc);
-    if (docSnapshot.exists()) {
-      let userData = docSnapshot.data();
-      setUser((prevUser) =>
-        prevUser
-          ? { ...prevUser, regNo: userData.regNo, userId: userData.userId }
-          : null,
-      );
-    }
-  };
 
   const signIn = async (
     email: string,
@@ -79,6 +65,16 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       if (response?.user) {
         console.log("User signed in:");
       }
+
+      const res = await apiFetch(
+        "http://192.168.100.4:3000/api/users/me",
+      );
+      const userinfo = await res.json();
+      // console.log(userinfo.reg_no);
+      setUser({...response.user, regNo:userinfo.reg_no})
+
+
+
       return { success: true };
     } catch (e) {
       const error = e as Error;
@@ -103,6 +99,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+
   const signUp = async (
     email: string,
     password: string,
@@ -116,11 +113,21 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
         password,
       );
       console.log("User signed up:");
-
       await setDoc(doc(db, "users", response?.user?.uid), {
-        regNo: regNo,
         userId: response?.user?.uid,
       });
+      const token = await response?.user?.getIdToken();
+      
+      await fetch("http://192.168.100.4:3000/api/users", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ regNo }),
+    });
+
+
       return { success: true, data: response?.user };
     } catch (e) {
       const error = e as Error;
