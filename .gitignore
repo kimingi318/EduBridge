@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+serviceAccountKey.json
+.env
+
 # Expo
 .expo/
 dist/
