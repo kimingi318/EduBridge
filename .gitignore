@@ -5,6 +5,7 @@ node_modules/
 
 serviceAccountKey.json
 .env
+firebaseConfig.js
 
 # Expo
 .expo/
