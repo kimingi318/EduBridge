@@ -47,7 +47,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAuthenticating(true);
-        setUser(user);
+        setUser(user as CustomUser);
       } else {
         setIsAuthenticating(false);
         setUser(null);
@@ -66,14 +66,22 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
         console.log("User signed in:");
       }
 
-      const res = await apiFetch(
-        "http://192.168.100.4:3000/api/users/me",
-      );
-      const userinfo = await res.json();
-      // console.log(userinfo.reg_no);
-      setUser({...response.user, regNo:userinfo.reg_no})
-
-
+      try {
+        const res = await apiFetch(
+          "http://192.168.100.4:3000/api/users/me",
+        );
+        if (res.ok) {
+          const userinfo = await res.json();
+          setUser({...response.user as CustomUser, regNo:userinfo.reg_no})
+        } else {
+          console.warn("API returned status:", res.status);
+          setUser(response.user as CustomUser);
+        }
+      } catch (apiError) {
+        console.warn("Failed to fetch user info from API:", apiError);
+        // Still set the user even if API call fails
+        setUser(response.user as CustomUser);
+      }
 
       return { success: true };
     } catch (e) {
@@ -118,14 +126,21 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       });
       const token = await response?.user?.getIdToken();
       
-      await fetch("http://192.168.100.4:3000/api/users", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ regNo }),
-    });
+      try {
+        const response2 = await fetch("http://192.168.100.4:3000/api/users", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ regNo }),
+        });
+        if (!response2.ok) {
+          console.warn("Failed to create user profile on backend:", response2.status);
+        }
+      } catch (apiError) {
+        console.warn("Failed to create user profile:", apiError);
+      }
 
 
       return { success: true, data: response?.user };
