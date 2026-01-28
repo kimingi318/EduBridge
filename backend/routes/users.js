@@ -33,16 +33,4 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
   res.json({ success: true });
 });
 
-// //profile
-// router.post("/profiles", verifyFirebaseToken, async (req, res) => {
-//   const { name, Phone } = req.body;
-
-//   await db.query(
-//     "INSERT INTO profiles (firebase_uid, name, Phone, Profile-Url) VALUES (?, ?, ?, 'https://photos.google.com/photo/AF1QipOGRHaoTVX9p9cNTpII-vb2tX6iTnTVvXUr52uk')",
-//     [req.user.uid, name, Phone],
-//   );
-
-//   res.json({ success: true });
-// });
-
 export default router;
