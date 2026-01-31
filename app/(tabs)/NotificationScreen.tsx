@@ -1,12 +1,13 @@
-import AddFaculty from '@/components/addFaculty'
-import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { View } from 'react-native';
+
 
 export default function NotificationScreen()  {
   return (
-    <SafeAreaView className="flex-1 ">
-      <AddFaculty/>
-    </SafeAreaView>
+    <View className='flex-1'>
+      <StatusBar style="dark" />
+    </View>
   )
 }
 

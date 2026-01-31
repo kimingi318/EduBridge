@@ -12,7 +12,6 @@ import {
   View,
 } from "react-native";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { blurhash } from "../../utils/common";
 
 export default function HomeScreen() {
@@ -20,13 +19,13 @@ export default function HomeScreen() {
 
 
   return (
-    <SafeAreaView className="flex-1 ">
+    <View className="flex-1">
       <ImageBackground source={require("../../assets/images/main-bg-img.jpg")}>
-        <StatusBar style="light" backgroundColor="#000" />
+        <StatusBar style="light"  />
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* HEADER */}
           <View
-            style={{ marginTop: hp(4) }}
+            style={{ marginTop: hp(6) }}
             className="px-5 flex-1 items-center pb-8 "
           >
             <View className="flex-row items-center justify-between">
@@ -150,7 +149,7 @@ export default function HomeScreen() {
           </View>
         </ScrollView>
       </ImageBackground>
-    </SafeAreaView>
+    </View>
   );
 }
 /* MEMO COMPONENT */
