@@ -14,8 +14,7 @@ export default function TabLayout() {
            height: hp(7),
          },
         tabBarLabelStyle: { fontSize: hp(1.5) },
-
-      }}
+        tabBarHideOnKeyboard: true,      }}
     >
       <Tabs.Screen
         name="HomeScreen"
