@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Alert, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import DropDownPicker from "react-native-dropdown-picker";
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { StatusBar } from "expo-status-bar";
+import React, { useState } from "react";
+import { Alert, ImageBackground, Platform, StyleSheet, Text, TextInput, View } from "react-native";
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { apiFetch } from "../utils/api";
+import GradientButton from "./GradientButton";
 
-type Faculty= {
-    id: string;
-    name: string;
-    abbv: string;
-}
 
 const API_BASE_URL = Platform.OS === "web"
     ? "http://localhost:3000"
@@ -16,44 +14,18 @@ const API_BASE_URL = Platform.OS === "web"
 const AddFaculty = () => {
     const [name, setName] = useState("");
     const [abbv, setAbbv] = useState("");
-    const [DeptName, setDeptName] = useState("");
-    const [faculties, setFaculties] = useState<Faculty[]>([]);
-    const [items , setItems] = useState<any[]>([]);
-    const [facultyId ,setFacultyId] = useState("");
-    const [open, setOpen] = useState(false);
-    const [value, setValue] = useState(null);
-    
-    useEffect(()=>{
-    const handleGetFaculty = async () => {
-        try {
-            const res = await apiFetch(`${API_BASE_URL}/api/faculties/`, {
-                method: "GET",
-            });
-            if (res.ok) {
-                const faculties: Faculty[] = await res.json();
-                // faculties.forEach((faculty: any) => { console.log(faculty.name) });
 
-                setFaculties(faculties);
-                setItems(
-                    faculties.map((faculty) =>({
-                        label: faculty.name,
-                        value: faculty.id,
-                    }))
-                )
+
+
+
+    const handleSubmitFaculty = async () => {
+        try {
+            if (!name || !abbv) {
+                Alert.alert("Error", "Please fill all fields");
             }
-        }
-        catch (err) {
-            console.error(err);
-        }
-    }
-    handleGetFaculty();
-},[]);
-
-
-    const handleSubmit = async () => {
-        try {
             const res = await apiFetch(`${API_BASE_URL}/api/faculties`, {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, abbv }),
             });
             if (res.ok) {
@@ -65,94 +37,71 @@ const AddFaculty = () => {
 
     };
 
-    const handleAddDepartment = async ()=>{
-        const facultyId = value;
-        if(!DeptName || !facultyId){
-            Alert.alert("Error", "Please fill all fields");
-            return;
-        }
-        try{
-            const res = await apiFetch(`${API_BASE_URL}/api/departments`, {
-                method: "POST",
-                headers:{"Content-Type": "application/json"},
-                body: JSON.stringify({ name: DeptName, facultyId }),
-            });
-            if(res.ok){
-                Alert.alert("Success", "Department added successfully!");
-                setDeptName("");
-                setFacultyId("");
-            }else{
-                Alert.alert("Error", "Failed to add department");
-            }
-        }
-        catch(err){
-            console.error(err);
-            Alert.alert("Error", "Failed to add department")
-        }
-    }
+
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.header}>Add Faculty</Text>
+        <View>
+            <ImageBackground
+                source={require("../assets/images/admin-signup-img.jpg")}
+                className=" w-full"
+                resizeMode="cover"
+                style={{ height: hp(40) }}>
+                <StatusBar style="light" />
+                <View style={{ height: hp(6), marginTop: hp(10), paddingLeft: wp(2) }} >
+                    <Text style={{ fontSize: hp(4), fontWeight: 'bold' }}
+                        className="text-white">Manage Academics</Text>
+                </View>
+                <View style={styles.container}>
+                    {/* Faculty Section*/}
+                    <View className="flex-row items-center " style={{ gap: wp(1) }}>
+                        <FontAwesome name="university" size={24} color="#1E5EFF" />
+                        <Text style={styles.header}>Add Faculty</Text>
+                    </View>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Faculty Name"
+                        value={name}
+                        onChangeText={setName}
+                    />
 
-            <TextInput
-                style={styles.input}
-                placeholder="Faculty Name"
-                value={name}
-                onChangeText={setName}
-            />
-
-            <TextInput
-                style={styles.input}
-                placeholder="Abbreviation"
-                value={abbv}
-                onChangeText={setAbbv}
-            />
-            <TouchableOpacity className="mb-4" onPress={handleSubmit}>
-                <Text>Add Faculty</Text>
-            </TouchableOpacity>
-
-         <DropDownPicker open={open} 
-         value={value}
-          items={items} 
-          setOpen={setOpen}
-           setValue={setValue}
-          setItems={setItems}
-           placeholder="Select a faculty" 
-           style={{ flex: 1 }} />
-
-            <Text style={styles.header}>Add Department</Text>
-                <Text>Choose Faculty</Text>
-             <TextInput
-                style={styles.input}
-                placeholder="department name"
-                value={DeptName}
-                onChangeText={setDeptName}
-            />
-             <TouchableOpacity onPress={handleAddDepartment} className="mb-4" >
-                <Text>Add Faculty</Text>
-            </TouchableOpacity>
-        </View>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Abbreviation"
+                        value={abbv}
+                        onChangeText={setAbbv}
+                    />
+                    <GradientButton onPress={handleSubmitFaculty} title="Add Faculty" />
+                </View>
+            </ImageBackground>
+    </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        padding: 20,
-        backgroundColor: "#f9f9f9",
+        backgroundColor: "#F5F7FB",
         flex: 1,
+        paddingTop: hp(1.5),
+        paddingLeft: wp(2),
+        paddingRight: wp(2),
+        paddingHorizontal: 5,
+        borderTopEndRadius: 30,
+        borderTopStartRadius: 30,
+        marginTop: hp(2),
+
     },
     header: {
-        fontSize: 22,
+        fontSize: hp(2.5),
         fontWeight: "bold",
-        marginBottom: 20,
+        marginBottom: hp(1.5),
+        marginTop: hp(1.5)
     },
     input: {
-        borderWidth: 1,
+        borderWidth: wp(0.3),
         borderColor: "#ccc",
         borderRadius: 8,
-        padding: 10,
-        marginBottom: 15,
+        padding: hp(1),
+        marginBottom:hp(1),
         backgroundColor: "#fff",
     },
 });
