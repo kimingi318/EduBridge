@@ -18,11 +18,6 @@ router.get("/", verifyFirebaseToken, async (req, res) => {
 router.post("/", verifyFirebaseToken, async (req, res) => {
   try {
     const { name, abbv } = req.body;
-    if (!name || !abbv) {
-      return res
-        .status(400)
-        .json({ error: "Name and abbreviation are required" });
-    }
     await db.query("INSERT INTO faculties (id, name, abbv) VALUES (?, ?, ?)", [
       randomUUID(),
       name,
