@@ -1,13 +1,10 @@
 import Profile from "@/components/Profile";
-import { apiFetch } from "@/utils/api";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { ImageBackground } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import {
-  Image,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -18,54 +15,33 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp
 } from "react-native-responsive-screen";
+import ImageViewer from '../../components/ImageViewer';
 import { useAuth } from "../../context/authContext";
 
-const API_BASE_URL = Platform.OS === "web"
-    ? "http://localhost:3000"
-    : "http://192.168.100.4:3000";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { signOut, user } = useAuth();
+  const { signOut, user, profile } = useAuth();
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Show profile modal if no profile data yet
+    if (!profile) {
+      setIsModalVisible(true);
+    } else {
+      setIsModalVisible(false);
+    }
+  }, [profile]);
+
   const handleSignOut = async () => {
     await signOut();
   };
-  const [name, setName] = useState("");
-  const [Phone, setPhone] = useState("");
-  const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
-  const[isModalVisible,setIsModalVisible]=useState<boolean>(false);
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const res = await apiFetch(`${API_BASE_URL}/api/profiles/me`,{
-          method: "GET",
-        });
-        if (!res.ok) {
-          setIsModalVisible(true);
-          return;
-        }else {
-        const data = await res.json();
-          if (!data){
-            setIsModalVisible(true);
-            return;
-          }else{
-          setIsModalVisible(false);
-          setName(data.name ?? "");
-          setPhone(data.phone ?? "");
-          setSelectedImage(data.profile_image ?? undefined);}
-        }
-      } catch (apiError) {
-        console.warn("Failed to load user profile:", apiError);
-      }
-    };
-
-    loadProfile();
-  }, []);
-
-  const editProfile = ()=>{
+  const editProfile = () => {
     setIsModalVisible(true);
   }
+
+  const placeholder = require('@/assets/images/camera.jpg')
 
   return (
     <View className="flex-1">
@@ -75,29 +51,29 @@ export default function ProfileScreen() {
 
           {/* ================= HEADER ================= */}
           <View
-            style={{ height: hp("28%") }}
+            style={{ height: hp(26) }}
             className=" items-center justify-center rounded-b-3xl"
           >
-            {/* Edit Profile Picture */}
+
             <TouchableOpacity onPress={handleSignOut} className="absolute top-10 right-4 bg-white/20 p-2 rounded-full">
               <Feather name="log-out" size={18} color="white" />
             </TouchableOpacity>
 
-            {/* Avatar */}
-            <View>
-              <Image source={{uri:selectedImage}}/>
+            {/*Profile Picture */}
+            <View >
+              <ImageViewer imgSource={placeholder} selectedImage={profile?.profile_image} />
             </View>
 
             {/* Name */}
             <Text className="text-white"
             >
-              {""}
+              {profile?.name || ""}
             </Text>
             <Text className="text-slate-200 text-xs mt-1">
-              {""}
+              {profile?.course_name || ""}
             </Text>
             <Text className="text-slate-300 text-xs">
-              {""}· {""}
+              {""}· {profile?.level || ""}
             </Text>
           </View>
 
@@ -128,7 +104,7 @@ export default function ProfileScreen() {
               </View>
               <View className="ml-3 flex-1">
                 <Text className="text-xs text-slate-500">username</Text>
-                <Text className="text-sm text-slate-900">{""}</Text>
+                <Text className="text-sm text-slate-900">{profile?.username || ""}</Text>
               </View>
             </View>
 
@@ -140,7 +116,7 @@ export default function ProfileScreen() {
 
               <View className="ml-3 flex-1">
                 <Text className="text-xs text-slate-500">Phone</Text>
-                <Text className="text-sm text-slate-900">{""}</Text>
+                <Text className="text-sm text-slate-900">{profile?.phone || ""}</Text>
               </View>
             </View>
 
@@ -154,7 +130,7 @@ export default function ProfileScreen() {
                 <Text className="text-xs text-slate-500">
                   Registration Number
                 </Text>
-                <Text className="text-sm text-slate-900">{user?.regNo ?? ""}</Text>
+                <Text className="text-sm text-slate-900">{profile?.reg_no ?? ""}</Text>
               </View>
             </View>
 
@@ -175,8 +151,8 @@ export default function ProfileScreen() {
             </View>
 
             <Profile
-            isVisible={isModalVisible}
-            onClose={()=>setIsModalVisible(false)}
+              isVisible={isModalVisible}
+              onClose={() => setIsModalVisible(false)}
             ></Profile>
 
             {/* ================= MY CLASSES ================= */}
@@ -232,7 +208,7 @@ const ClassCard = ({ title, lecturer, students }: any) => (
   </View>
 );
 const styles = StyleSheet.create({
-    header: {
+  header: {
     fontSize: hp(2.5),
     fontWeight: "bold",
     marginBottom: hp(1),

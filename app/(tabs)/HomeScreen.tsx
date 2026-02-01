@@ -1,5 +1,6 @@
 import ScheduleCard from "@/components/schedule";
 import SearchBar from "@/components/searchBar";
+import { useAuth } from '@/context/authContext';
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -11,11 +12,14 @@ import {
   Text,
   View,
 } from "react-native";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { blurhash } from "../../utils/common";
+
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { profile } = useAuth();
+
 
 
   return (
@@ -29,7 +33,8 @@ export default function HomeScreen() {
             className="px-5 flex-1 items-center pb-8 "
           >
             <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center space-x-3">
+              <View style={{paddingHorizontal:wp(2)}}
+              className="flex-row items-center ">
                 <View className="relative" style={{ marginRight: hp(2) }}>
                   <Image
                     style={{
@@ -37,19 +42,21 @@ export default function HomeScreen() {
                       aspectRatio: 1,
                       borderRadius: 100,
                     }}
-                    source={require("../../assets/images/student-dp.jpeg")}
-                    placeholder={{ blurhash }}
-                    transition={500}
+                    source={
+                      profile?.profile_image
+                        ? { uri: profile.profile_image }
+                        : require("../../assets/images/camera.jpg")
+                    }
                   />
                   <View className="absolute right-0 bottom-0 w-5 h-5 bg-green-500 rounded-full " />
                 </View>
 
                 <View>
-                  <Text className="text-white text-[32px]  font-inter-bold">
-                    Good morning, Peter
+                  <Text style={{fontSize:hp(2)}} className="text-white   font-inter-bold">
+                    Good morning, {profile?.username || 'Student'}
                   </Text>
-                  <Text className="text-blue-200 text-[22px] font-inter">
-                    IV · Semester 1 · BSc IT
+                  <Text style={{fontSize:hp(1.5)}} className="text-blue-200  font-inter">
+                    {profile?.level || ''} {profile?.course_name ? `· ${profile.course_name}` : 'Go to Profile and update profile'}
                   </Text>
                 </View>
               </View>
