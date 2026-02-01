@@ -16,7 +16,7 @@ router.get("/by-department/:deptId", verifyFirebaseToken, async (req, res) => {
   const { deptId } = req.params;
 
   const [rows] = await db.query(
-    "SELECT id, name FROM courses WHERE dept_id = ?",
+    "SELECT id,programme, name FROM courses WHERE dept_id = ?",
     [deptId],
   );
   res.json(rows);

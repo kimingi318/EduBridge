@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import express from "express";
 import { db } from "../db.js";
 import { verifyFirebaseToken } from "../middleware/auth.js";
@@ -15,17 +16,31 @@ router.get("/me", verifyFirebaseToken, async (req, res) => {
 
 router.post("/", verifyFirebaseToken, async (req, res) => {
   try {
-    const { name, phone, profileImage, level } = req.body;
+    const {
+      name,
+      phone,
+      profileImage,
+      level,
+      course_name,
+      reg_no,
+      username,
+      course_id,
+    } = req.body;
 
     await db.query(
-      `INSERT INTO profiles (firebase_uid, name, phone, profile_image, level)
-       VALUES (?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE
-         name = VALUES(name),
-         phone = VALUES(phone),
-         profile_image = VALUES(profile_image),
-         level = VALUES(level)`,
-      [req.user.uid, name, phone, profileImage, level || "IV"],
+      "INSERT INTO profiles (id,firebase_uid, name, phone, profile_image, level,course_name,reg_no,username,course_id) VALUES (?, ?,?, ?, ?, ?,?,?,?,?)",
+      [
+        randomUUID(),
+        req.user.uid,
+        name,
+        phone,
+        profileImage,
+        level,
+        course_name,
+        reg_no,
+        username,
+        course_id,
+      ],
     );
 
     res.json({ success: true });

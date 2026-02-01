@@ -1,6 +1,7 @@
 import express from "express";
 import { db } from "../db.js";
 import { verifyFirebaseToken } from "../middleware/auth.js";
+import {randomUUID} from "crypto";
 
 const router = express.Router();
 
@@ -23,11 +24,11 @@ router.get("/me", verifyFirebaseToken, async (req, res) => {
  * CREATE user profile (called after signup)
  */
 router.post("/", verifyFirebaseToken, async (req, res) => {
-  const { regNo } = req.body;
+  const { role } = req.body;
 
   await db.query(
-    "INSERT INTO users (firebase_uid, email, reg_no, role) VALUES (?, ?, ?, 'student')",
-    [req.user.uid, req.user.email, regNo],
+    "INSERT INTO users (id,firebase_uid, email, role) VALUES (?, ?, ?,?)",
+    [randomUUID(), req.user.uid, req.user.email, role],
   );
 
   res.json({ success: true });
