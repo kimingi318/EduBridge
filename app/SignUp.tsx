@@ -9,11 +9,13 @@ import {
   Alert,
   Image,
   ImageBackground,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 import { Menu, MenuOptions, MenuTrigger } from "react-native-popup-menu";
 import {
   heightPercentageToDP as hp,
@@ -24,17 +26,24 @@ import EduLogo from "../components/EduLogo";
 import Loading from "../components/loading";
 import { useAuth } from "../context/authContext";
 
+const data =[
+  {label: 'Student', value: 'Student'},
+  {label: 'Admin', value: 'Admin'},
+  {label: 'Lecturer', value: 'Lecturer'}
+]
 
 export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
-  const [regNo, setRegNo] = useState("");
+  const [role, setRole] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { signUp } = useAuth();
+   const [value, setValue] = useState(null);
+  
 
   const handleSignup = async () => {
-    if (!email || !regNo || !password || !confirmPassword) {
+    if (!email || !role || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
@@ -43,7 +52,7 @@ export default function SignUp() {
       return;
     }
     setLoading(true);
-    let response = await signUp(email, password, regNo);
+    let response = await signUp(email, password, role);
     setLoading(false);
 
     // console.log('got results: ', response);
@@ -127,7 +136,7 @@ export default function SignUp() {
         {/* Inputs */}
         <View className="space-y-5">
           <View>
-            <Text className="text-xs text-gray-500 mb-1">Email address*</Text>
+            <Text style={styles.header} className=" text-gray-500 mb-1">Email address*</Text>
             <TextInput
               value={email}
               onChangeText={setEmail}
@@ -137,19 +146,26 @@ export default function SignUp() {
           </View>
 
           <View>
-            <Text className="text-xs text-gray-500 mb-1">
-              Registration No.*
+            <Text style={styles.header} className=" text-gray-500 mb-1">
+              Role.*
             </Text>
-            <TextInput
-              value={regNo}
-              onChangeText={setRegNo}
-              className="border-b border-gray-300 pb-2 text-gray-800"
-              placeholder="EB1/61275/22"
-            />
+            <Dropdown 
+            style={styles.dropdown} 
+            data={data} 
+            labelField="label"  
+             placeholder="Select Role" 
+             value={value} 
+             valueField="value"
+             placeholderStyle={styles.placeholderStyle}
+             onChange={(item) => {
+                 setValue(item.value);
+                 setRole(item.value)
+             }}
+               />
           </View>
 
           <View>
-            <Text className="text-xs text-gray-500 mb-1">Password*</Text>
+            <Text style={styles.header} className=" text-gray-500 mb-1">Password*</Text>
             <View className="flex-row items-center border-b border-gray-300">
               <TextInput
                 value={password}
@@ -163,7 +179,7 @@ export default function SignUp() {
           </View>
 
           <View>
-            <Text className="text-xs text-gray-500 mb-1">
+            <Text style={styles.header} className=" text-gray-500 mb-1">
               Confirm Password*
             </Text>
             <View className="flex-row items-center border-b border-gray-300">
@@ -180,7 +196,7 @@ export default function SignUp() {
         </View>
 
         {/* Terms */}
-        <Text className="text-xs text-gray-400 mt-6 mb-6 leading-4">
+        <Text style={styles.header} className=" text-gray-400 mt-6 mb-6 leading-4">
           By clicking agree and join, you agree to the EduBridge{" "}
           <Text className="text-blue-600">
             User Agreement, privacy policy and cookie policy.
@@ -220,3 +236,19 @@ export default function SignUp() {
 const Divider = () => {
   return <View className="p-[1px] w-full bg-neutral-300" />;
 };
+const styles = StyleSheet.create({
+      dropdown: {
+          height: hp(6),
+          borderColor: "#ccc",
+          borderBottomWidth: wp(0.3),
+          backgroundColor: "#fff",
+          marginBottom: hp(0.5),
+      },
+      header:{
+        fontSize:hp(1.5)
+      },
+      placeholderStyle:{
+          color: '#F80000',
+          fontSize: hp(0.5)
+      }
+})
