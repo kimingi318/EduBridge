@@ -14,7 +14,8 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import { auth, db } from "../firebaseConfig"; // Adjust the import path as necessary
+import { Platform } from "react-native";
+import { auth, db } from "../firebaseConfig";
 
 interface CustomUser extends User {
   regNo?: string;
@@ -22,8 +23,14 @@ interface CustomUser extends User {
   userId?: string;
 }
 
+const API_BASE_URL = Platform.OS === "web"
+  ? "http://localhost:3000"
+  : "http://192.168.100.4:3000";
+
 export const AuthContext = createContext<{
   user: CustomUser | null;
+  profile: any | null;
+  refreshProfile: () => Promise<void>;
   signIn: (
     email: string,
     password: string,
@@ -39,6 +46,7 @@ export const AuthContext = createContext<{
 
 export const AuthContextProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<CustomUser | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [isAuthenticating, setIsAuthenticating] = useState<boolean | undefined>(
     undefined,
   );
@@ -48,9 +56,28 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       if (user) {
         setIsAuthenticating(true);
         setUser(user as CustomUser);
+        // fetch profile when auth state becomes available
+        (async () => {
+          try {
+            const token = await user.getIdToken();
+            const res = await fetch(`${API_BASE_URL}/api/profiles/me`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setProfile(data || null);
+            } else {
+              setProfile(null);
+            }
+          } catch (err) {
+            console.warn("Failed to fetch profile:", err);
+            setProfile(null);
+          }
+        })();
       } else {
         setIsAuthenticating(false);
         setUser(null);
+        setProfile(null);
       }
     });
     return unsub;
@@ -68,7 +95,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
 
       try {
         const res = await apiFetch(
-          "http://192.168.100.4:3000/api/users/me",
+          `${API_BASE_URL}/api/users/me`,
         );
         if (res.ok) {
           const userinfo = await res.json();
@@ -102,6 +129,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
     try {
       await firebaseSignOut(auth);
       console.log("User signed out");
+      setProfile(null);
     } catch (error) {
       console.error("Error during sign out:", error);
     }
@@ -111,7 +139,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
   const signUp = async (
     email: string,
     password: string,
-    regNo: string,
+    role: string,
   ): Promise<{ success: boolean; data?: any; error?: string }> => {
     try {
       // sign up logic here
@@ -127,13 +155,13 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       const token = await response?.user?.getIdToken();
       
       try {
-        const response2 = await fetch("http://192.168.100.4:3000/api/users", {
+        const response2 = await fetch(`${API_BASE_URL}/api/users`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ regNo }),
+          body: JSON.stringify({ role }),
         });
         if (!response2.ok) {
           console.warn("Failed to create user profile on backend:", response2.status);
@@ -157,9 +185,25 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  const refreshProfile = async (): Promise<void> => {
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) return;
+      const res = await fetch(`${API_BASE_URL}/api/profiles/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data || null);
+      }
+    } catch (err) {
+      console.warn("refreshProfile error:", err);
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, signIn, signUp, signOut, isAuthenticating }}
+      value={{ user, profile, refreshProfile, signIn, signUp, signOut, isAuthenticating }}
     >
       {children}
     </AuthContext.Provider>
