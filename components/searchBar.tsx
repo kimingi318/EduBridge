@@ -11,6 +11,7 @@ const SearchBar = () => {
               <TextInput
                 placeholder="Search classes, lecturers, rooms..."
                 className="flex-1 ml-2 text-gray-700"
+                style={{fontSize: hp(1.5)}}
                 onChangeText={()=>{}}
               />
               <Ionicons name="mic-outline" size={20} color="#6B7280" />
