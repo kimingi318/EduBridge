@@ -15,8 +15,8 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp
 } from "react-native-responsive-screen";
-import ImageViewer from '../../components/ImageViewer';
-import { useAuth } from "../../context/authContext";
+import ImageViewer from '../../../components/ImageViewer';
+import { useAuth } from "../../../context/authContext";
 
 
 export default function ProfileScreen() {
@@ -45,7 +45,7 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1">
-      <ImageBackground source={require("../../assets/images/main-bg-img.jpg")}>
+      <ImageBackground source={require("../../../assets/images/main-bg-img.jpg")}>
         <StatusBar style="light" />
         <ScrollView showsVerticalScrollIndicator={false}>
 

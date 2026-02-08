@@ -1,10 +1,10 @@
 import { useAuth } from '@/context/authContext';
-import { apiFetch } from '@/utils/api';
+import { API_BASE_URL, apiFetch } from '@/utils/api';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { Alert, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import GradientButton from './GradientButton';
@@ -17,10 +17,6 @@ type Props = PropsWithChildren<{
     isVisible: boolean;
     onClose: () => void;
 }>;
-const API_BASE_URL =
-    Platform.OS === "web"
-        ? "http://localhost:3000"
-        : "http://192.168.100.4:3000";
 
 type Department = {
     id: string;

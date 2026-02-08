@@ -1,15 +1,11 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import { Alert, ImageBackground, Platform, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, ImageBackground, StyleSheet, Text, TextInput, View } from "react-native";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
-import { apiFetch } from "../utils/api";
+import { API_BASE_URL, apiFetch } from "../utils/api";
 import GradientButton from "./GradientButton";
 
-
-const API_BASE_URL = Platform.OS === "web"
-    ? "http://localhost:3000"
-    : "http://192.168.100.4:3000";
 
 const AddFaculty = () => {
     const [name, setName] = useState("");

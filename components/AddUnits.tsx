@@ -2,7 +2,6 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { useEffect, useState } from "react";
 import {
     Alert,
-    Platform,
     StyleSheet,
     Text,
     TextInput,
@@ -13,7 +12,7 @@ import {
     heightPercentageToDP as hp,
     widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
-import { apiFetch } from "../utils/api";
+import { API_BASE_URL, apiFetch } from "../utils/api";
 import GradientButton from "./GradientButton";
 
 type Faculty = {
@@ -30,11 +29,6 @@ type Course = {
     id: string;
     name: string;
 };
-
-const API_BASE_URL =
-    Platform.OS === "web"
-        ? "http://localhost:3000"
-        : "http://192.168.100.4:3000";
 
 const AddUnits = () => {
     const [faculties, setFaculties] = useState<Faculty[]>([]);

@@ -1,4 +1,5 @@
-import { apiFetch } from "@/utils/api";
+import { API_BASE_URL, apiFetch } from "@/utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -14,18 +15,13 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import { Platform } from "react-native";
 import { auth, db } from "../firebaseConfig";
 
 interface CustomUser extends User {
   regNo?: string;
-  role?: 'student'| 'lecturer'| 'admin'| 'council'
+  role?: string;
   userId?: string;
 }
-
-const API_BASE_URL = Platform.OS === "web"
-  ? "http://localhost:3000"
-  : "http://192.168.100.4:3000";
 
 export const AuthContext = createContext<{
   user: CustomUser | null;
@@ -51,12 +47,39 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
     undefined,
   );
 
+  // Save profile to AsyncStorage
+  const saveProfileToStorage = async (profileData: any) => {
+    try {
+      await AsyncStorage.setItem("userProfile", JSON.stringify(profileData));
+    } catch (err) {
+      console.warn("Failed to save profile to storage:", err);
+    }
+  };
+
+  // Load profile from AsyncStorage
+  const loadProfileFromStorage = async () => {
+    try {
+      const stored = await AsyncStorage.getItem("userProfile");
+      return stored ? JSON.parse(stored) : null;
+    } catch (err) {
+      console.warn("Failed to load profile from storage:", err);
+      return null;
+    }
+  };
+
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setIsAuthenticating(true);
         setUser(user as CustomUser);
-        // fetch profile when auth state becomes available
+        
+        // Load cached profile immediately
+        const cachedProfile = await loadProfileFromStorage();
+        if (cachedProfile) {
+          setProfile(cachedProfile);
+        }
+
+        // Fetch fresh profile when auth state becomes available
         (async () => {
           try {
             const token = await user.getIdToken();
@@ -66,6 +89,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
             if (res.ok) {
               const data = await res.json();
               setProfile(data || null);
+              await saveProfileToStorage(data);
             } else {
               setProfile(null);
             }
@@ -78,6 +102,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
         setIsAuthenticating(false);
         setUser(null);
         setProfile(null);
+        await AsyncStorage.removeItem("userProfile");
       }
     });
     return unsub;
@@ -99,7 +124,10 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
         );
         if (res.ok) {
           const userinfo = await res.json();
-          setUser({...response.user as CustomUser, regNo:userinfo.reg_no})
+          const updatedUser = {...response.user as CustomUser, regNo:userinfo.reg_no, role:userinfo.role};
+          setUser(updatedUser);
+          // Also fetch and save profile
+          await refreshProfile();
         } else {
           console.warn("API returned status:", res.status);
           setUser(response.user as CustomUser);
@@ -130,6 +158,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       await firebaseSignOut(auth);
       console.log("User signed out");
       setProfile(null);
+      await AsyncStorage.removeItem("userProfile");
     } catch (error) {
       console.error("Error during sign out:", error);
     }
@@ -195,6 +224,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       if (res.ok) {
         const data = await res.json();
         setProfile(data || null);
+        await saveProfileToStorage(data);
       }
     } catch (err) {
       console.warn("refreshProfile error:", err);

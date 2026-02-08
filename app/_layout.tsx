@@ -2,9 +2,11 @@ import { useFonts } from "expo-font";
 import { Slot, SplashScreen, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { MenuProvider } from "react-native-popup-menu";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthContextProvider, useAuth } from "../context/authContext";
 
 export function RootLayout() {
+  const { user } = useAuth()
   const { isAuthenticating } = useAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -22,31 +24,47 @@ export function RootLayout() {
     "InterMedium-24": require('../assets/fonts/Inter_24pt-Medium.ttf'),
     "InterLight-24": require('../assets/fonts/Inter_24pt-Light.ttf'),
   })
-  useEffect(()=>{
-    if (fontsLoaded){
+
+  useEffect(() => {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-    
+
   }, [fontsLoaded]);
 
   // if(!fontsLoaded) return null;
 
   useEffect(() => {
     if (typeof isAuthenticating === "undefined") return;
-    const inApp = segments[0] === "(tabs)";
+    const inApp = segments[0] === "(admin)" || segments[0] === "(lecturer)" || segments[0] === "(student)";
+    const publicRouter  = segments[0] === "LandingPage" || segments[0]=== "SignIn" || segments[0]==="SignUp"
     if (isAuthenticating && !inApp) {
-      //redirect to HomeScreen
-      router.replace("/(tabs)/HomeScreen");
-    } else if (isAuthenticating === false) {
+      if (!user) return;
+      const role = user.role?.toLowerCase();
+      switch (role) {
+        case 'admin':
+          router.replace('/(student)/(tabs)/HomeScreen');
+          return;
+        case 'lecturer':
+          router.replace('/(lecturer)/(tabs)/HomeScreen');
+          return;
+        case 'student':
+          router.replace('/(student)/(tabs)/HomeScreen');
+        default:
+          router.replace('/SignUp');
+          return;
+      }
+    } else if (!isAuthenticating && inApp) {
       //redirect to LandingPage
-      router.replace("/SignIn");
+      router.replace("/LandingPage");
     } else if (!isAuthenticating && inApp) {
       //redirect to HomeScreen
-      router.replace("/SignUp");
+      router.replace("/SignIn");
     }
-  }, [isAuthenticating]);
-  {
-  }
+
+
+
+  }, [user, isAuthenticating,router,segments]);
   return <Slot />;
 }
 
@@ -54,8 +72,11 @@ export default function RootNavigator() {
   return (
     <MenuProvider>
       <AuthContextProvider>
-        <RootLayout />
+        <SafeAreaProvider>
+          <RootLayout />
+        </SafeAreaProvider>
       </AuthContextProvider>
     </MenuProvider>
+
   );
 }

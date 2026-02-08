@@ -43,12 +43,12 @@ export default function LandingPage() {
         />
       </View>
       {/* CTA */}
-      <View className="items-center" style={{marginTop: hp(14)}}>
+      <View className="items-center" style={{marginTop: hp(10)}}>
        <GradientButton
        title="Get Started"
        onPress={() => {
         // Navigate to SignIn page
-        router.replace('/SignIn');
+        router.push('/SignIn');
        }}
        />
       </View>

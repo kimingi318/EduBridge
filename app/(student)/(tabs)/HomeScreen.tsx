@@ -10,10 +10,10 @@ import {
   ImageBackground,
   ScrollView,
   Text,
-  View,
+  View
 } from "react-native";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
-import { blurhash } from "../../utils/common";
+import { blurhash } from "../../../utils/common";
 
 
 export default function HomeScreen() {
@@ -24,7 +24,7 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1">
-      <ImageBackground source={require("../../assets/images/main-bg-img.jpg")}>
+      <ImageBackground source={require("../../../assets/images/main-bg-img.jpg")}>
         <StatusBar style="light"  />
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* HEADER */}
@@ -45,7 +45,7 @@ export default function HomeScreen() {
                     source={
                       profile?.profile_image
                         ? { uri: profile.profile_image }
-                        : require("../../assets/images/camera.jpg")
+                        : require("../../../assets/images/camera.jpg")
                     }
                   />
                   <View className="absolute right-0 bottom-0 w-5 h-5 bg-green-500 rounded-full " />
@@ -97,7 +97,7 @@ export default function HomeScreen() {
                 {/* Event Card */}
                 <View className="bg-white rounded-2xl w-64 mr-4 overflow-hidden shadow">
                   <Image
-                    source={require("../../assets/images/Graduation-event-img.jpg")}
+                    source={require("../../../assets/images/Graduation-event-img.jpg")}
                     style={{ height: hp(12) }}
                     placeholder={{ blurhash }}
                     transition={500}
@@ -112,7 +112,7 @@ export default function HomeScreen() {
                 </View>
                 <View className="bg-white rounded-2xl w-64 mr-4 overflow-hidden shadow">
                   <Image
-                    source={require("../../assets/images/vote-event-img.jpg")}
+                    source={require("../../../assets/images/vote-event-img.jpg")}
                     style={{ height: hp(12) }}
                     placeholder={{ blurhash }}
                     transition={500}

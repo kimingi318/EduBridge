@@ -1,7 +1,7 @@
+import { randomUUID } from "crypto";
 import express from "express";
 import { db } from "../db.js";
 import { verifyFirebaseToken } from "../middleware/auth.js";
-import {randomUUID} from "crypto";
 
 const router = express.Router();
 

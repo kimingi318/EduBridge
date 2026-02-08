@@ -238,17 +238,17 @@ const Divider = () => {
 };
 const styles = StyleSheet.create({
       dropdown: {
-          height: hp(6),
+          height: hp(5),
           borderColor: "#ccc",
           borderBottomWidth: wp(0.3),
           backgroundColor: "#fff",
-          marginBottom: hp(0.5),
+          marginBottom: hp(0.3),
       },
       header:{
         fontSize:hp(1.5)
       },
       placeholderStyle:{
-          color: '#F80000',
-          fontSize: hp(0.5)
+          color: '#9ca3af',
+          fontSize: hp(1.5)
       }
 })
