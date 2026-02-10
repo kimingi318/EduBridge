@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   type User,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import {
   createContext,
   useContext,
@@ -18,7 +18,6 @@ import {
 import { auth, db } from "../firebaseConfig";
 
 interface CustomUser extends User {
-  regNo?: string;
   role?: string;
   userId?: string;
 }
@@ -34,7 +33,7 @@ export const AuthContext = createContext<{
   signUp: (
     email: string,
     password: string,
-    regNo: string,
+    role: string
   ) => Promise<{ success: boolean; data?: any; error?: string }>;
   signOut: () => Promise<void>;
   isAuthenticating: boolean | undefined;
@@ -72,7 +71,9 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       if (user) {
         setIsAuthenticating(true);
         setUser(user as CustomUser);
-        
+
+        updateUserData(user.uid);
+
         // Load cached profile immediately
         const cachedProfile = await loadProfileFromStorage();
         if (cachedProfile) {
@@ -107,6 +108,15 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
     });
     return unsub;
   }, []);
+  const updateUserData = async (userId: any) => {
+    const docRef = doc(db, 'users', userId)
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      let data = docSnap.data();
+      setUser({ ...user as CustomUser, role: data.role, userId: data.userId })
+    }
+  }
 
   const signIn = async (
     email: string,
@@ -124,7 +134,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
         );
         if (res.ok) {
           const userinfo = await res.json();
-          const updatedUser = {...response.user as CustomUser, regNo:userinfo.reg_no, role:userinfo.role};
+          const updatedUser = { ...response.user as CustomUser, regNo: userinfo.reg_no, role: userinfo.role };
           setUser(updatedUser);
           // Also fetch and save profile
           await refreshProfile();
@@ -179,10 +189,14 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       );
       console.log("User signed up:");
       await setDoc(doc(db, "users", response?.user?.uid), {
+        role,
         userId: response?.user?.uid,
       });
+      // setUser((prev)=>
+      //   prev? {...prev,role: response?.user?.role}
+      // )
       const token = await response?.user?.getIdToken();
-      
+
       try {
         const response2 = await fetch(`${API_BASE_URL}/api/users`, {
           method: "POST",
