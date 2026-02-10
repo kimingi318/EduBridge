@@ -3,7 +3,7 @@ import { API_BASE_URL, apiFetch } from '@/utils/api';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
-import React, { PropsWithChildren, useEffect, useState } from 'react';
+import { PropsWithChildren, useEffect, useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
@@ -29,6 +29,7 @@ type Course = {
     name: string;
     departmentId: string;
 };
+
 
 export default function Profile({ isVisible, children, onClose }: Props) {
     const [fullName, setFullName] = useState<string>('');
