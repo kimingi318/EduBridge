@@ -5,7 +5,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
 import {
   ImageBackground,
   ScrollView,
@@ -48,11 +47,11 @@ export default function HomeScreen() {
                         : require("../../../assets/images/camera.jpg")
                     }
                   />
-                  <View className="absolute right-0 bottom-0 w-5 h-5 bg-green-500 rounded-full " />
+                  <View style={{width:wp(3.5),height:hp(1.5)}} className="absolute right-0 bottom-0  bg-green-500 rounded-full " />
                 </View>
 
                 <View>
-                  <Text style={{fontSize:hp(2)}} className="text-white   font-inter-bold">
+                  <Text style={{fontSize:hp(1.5)}} className="text-white   font-inter-bold">
                     Good morning, {profile?.username || 'Student'}
                   </Text>
                   <Text style={{fontSize:hp(1.5)}} className="text-blue-200  font-inter">
