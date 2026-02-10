@@ -1,3 +1,4 @@
+import ScreenWrapper from "@/components/ScreenWrapper";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
@@ -34,37 +35,40 @@ export function RootLayout() {
 
   // if(!fontsLoaded) return null;
 
+
   useEffect(() => {
     if (typeof isAuthenticating === "undefined") return;
     const inApp = segments[0] === "(admin)" || segments[0] === "(lecturer)" || segments[0] === "(student)";
-    const publicRouter  = segments[0] === "LandingPage" || segments[0]=== "SignIn" || segments[0]==="SignUp"
-    if (isAuthenticating && !inApp) {
+    const publicRoutes = segments[0] === "LandingPage" || segments[0] === "SignIn" || segments[0] === "SignUp"
+    if (isAuthenticating) {
       if (!user) return;
-      const role = user.role?.toLowerCase();
-      switch (role) {
-        case 'admin':
-          router.replace('/(student)/(tabs)/HomeScreen');
-          return;
-        case 'lecturer':
-          router.replace('/(lecturer)/(tabs)/HomeScreen');
-          return;
-        case 'student':
-          router.replace('/(student)/(tabs)/HomeScreen');
-        default:
-          router.replace('/SignUp');
-          return;
+      if (!inApp) {
+        const role = user?.role
+        switch (role) {
+          case 'Admin':
+            router.replace('/(admin)/(tabs)/HomeScreen');
+            return;
+          case 'Lecturer':
+            router.replace('/(lecturer)/(tabs)/HomeScreen');
+            return;
+
+          case 'Student':
+            router.replace('/(student)/(tabs)/HomeScreen');
+        }
       }
-    } else if (!isAuthenticating && inApp) {
-      //redirect to LandingPage
-      router.replace("/LandingPage");
-    } else if (!isAuthenticating && inApp) {
-      //redirect to HomeScreen
-      router.replace("/SignIn");
+    }
+    else if (!isAuthenticating) {
+      if (publicRoutes) {
+        router.replace("/SignUp");
+      }
+      else if(inApp){
+        router.replace("/SignIn")
+      }
     }
 
 
 
-  }, [user, isAuthenticating,router,segments]);
+  }, [user, isAuthenticating, router, segments]);
   return <Slot />;
 }
 
@@ -72,9 +76,11 @@ export default function RootNavigator() {
   return (
     <MenuProvider>
       <AuthContextProvider>
+        <ScreenWrapper>
         <SafeAreaProvider>
           <RootLayout />
         </SafeAreaProvider>
+        </ScreenWrapper>
       </AuthContextProvider>
     </MenuProvider>
 
