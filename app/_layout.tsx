@@ -33,13 +33,10 @@ export function RootLayout() {
 
   }, [fontsLoaded]);
 
-  // if(!fontsLoaded) return null;
-
-
   useEffect(() => {
     if (typeof isAuthenticating === "undefined") return;
     const inApp = segments[0] === "(admin)" || segments[0] === "(lecturer)" || segments[0] === "(student)";
-    const publicRoutes = segments[0] === "LandingPage" || segments[0] === "SignIn" || segments[0] === "SignUp"
+    // const publicRoutes = segments[0] === "LandingPage" || segments[0] === "SignIn" || segments[0] === "SignUp"
     if (isAuthenticating) {
       if (!user) return;
       if (!inApp) {
@@ -58,16 +55,13 @@ export function RootLayout() {
       }
     }
     else if (!isAuthenticating) {
-      if (publicRoutes) {
-        router.replace("/SignUp");
-      }
-      else if(inApp){
+      // if (publicRoutes) {
+      //   router.replace("/SignUp");
+      // }
+      if(inApp){
         router.replace("/SignIn")
       }
     }
-
-
-
   }, [user, isAuthenticating, router, segments]);
   return <Slot />;
 }
@@ -83,6 +77,5 @@ export default function RootNavigator() {
         </ScreenWrapper>
       </AuthContextProvider>
     </MenuProvider>
-
   );
 }
