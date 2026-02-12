@@ -1,7 +1,10 @@
 import AddCourses from '@/components/AddCourses';
 import SearchBar from '@/components/searchBar';
 import { useAuth } from '@/context/authContext';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
@@ -105,6 +108,46 @@ const HomeScreen = () => {
               isVisible={isModalVisible}
               onClose={() => setIsModalVisible(false)}>
             </AddCourses>
+            <Text style={styles.header} className='text-black font-inter-semibold'>Alert & Approvals</Text>
+            <View>
+              <AlertCard
+                Title="Review student pending approval"
+                type="Student Council Approval"
+                action={""}
+                number="4"
+              />
+              <AlertCard
+                Title="Review and approve pending lecturers"
+                type="Lecturer Approval"
+                action={""}
+                number="3"
+              />
+              <AlertCard
+                Title="Approval new Admin"
+                type="Admin Approval"
+                action={""}
+                number="2"
+              />
+            </View>
+            <Text style={styles.header} className='text-black font-inter-semibold'>Recent Activity</Text>
+            <View>
+              <ActivityCard
+                  Title='New Lecturer approved'
+                  action={""}
+              />
+              <ActivityCard
+                  Title='New memo added'
+                  action={""}
+              />
+              <ActivityCard
+                  Title='Student account limited'
+                  action={""}
+              />
+              <ActivityCard
+                  Title='New Lecturer approved'
+                  action={""}
+              />
+            </View>
           </View>
         </ScrollView>
       </ImageBackground>
@@ -115,12 +158,12 @@ const HomeScreen = () => {
 export default HomeScreen
 
 const styles = StyleSheet.create({
-  container:{
+  container: {
     height: hp(10),
-     marginBottom: hp(1),
-     paddingHorizontal:wp(1)
+    marginBottom: hp(1),
+    paddingHorizontal: wp(1)
   },
-  header:{
+  header: {
     fontSize: hp(1.5),
     marginBottom: hp(1)
   }
@@ -172,7 +215,7 @@ function ActionCard({
       >
         <View className='rounded-[20px] flex-1 items-center justify-center'>
           <FontAwesome name={name} size={24} color="white" />
-          <Text className="text-white" style={{ fontSize: hp(1.5),marginTop:hp(1) }}>{Title}</Text>
+          <Text className="text-white" style={{ fontSize: hp(1.5), marginTop: hp(1) }}>{Title}</Text>
         </View>
       </LinearGradient>
 
@@ -180,3 +223,56 @@ function ActionCard({
 
   );
 }
+
+function AlertCard({
+  Title,
+  type,
+  action,
+  number,
+}: {
+  Title: string;
+  type: string;
+  action: any;
+  number: string;
+}) {
+  return (
+    <TouchableOpacity onPress={action}>
+      <View style={{ height: hp(7), padding: hp(1), marginBottom: hp(1) }} className=' bg-white flex-row  rounded-[20px] items-center'>
+        <View className='rounded-lg bg-edulightblue p-1.5'>
+          <AntDesign name="alert" size={24} color="red" />
+        </View>
+
+        <View style={{ marginLeft: hp(2) }} className='flex-1'>
+          <Text style={{ fontSize: hp(2) }} className='font-inter-medium'>{type}</Text>
+          <Text style={{ fontSize: hp(1.5) }} className='font-inter-light'>{Title}</Text>
+        </View>
+        <View style={{ width: wp(5), height: hp(3) }} className='rounded-full p-1 bg-[#ff0000]'>
+          <Text className='text-white font-inter-bold'>{number}</Text>
+        </View>
+        <Entypo name="chevron-right" size={24} color="black" />
+      </View>
+    </TouchableOpacity>
+  );
+}
+function ActivityCard({
+  Title,
+  // type,
+  action,
+}: {
+  Title: string;
+  // type: string;
+  action: any;
+}) {
+  return (
+    <TouchableOpacity onPress={action}>
+      <View style={{ height: hp(7), padding: hp(1), marginBottom: hp(1) }} className=' bg-white flex-row  rounded-[20px] items-center'>
+        <View className='rounded-lg bg-edulightblue p-1.5'>
+          <MaterialIcons name="admin-panel-settings" size={24} color="blue" /> 
+        </View>
+          {/* <Text style={{ fontSize: hp(2) }} className='font-inter-medium'>{type}</Text> */}
+        <Text style={{ fontSize: hp(1.5),marginLeft: hp(2) }} className='font-inter-light'>{Title}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
