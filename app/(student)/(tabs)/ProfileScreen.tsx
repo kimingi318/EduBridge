@@ -1,9 +1,7 @@
 import Profile from "@/components/Profile";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { ImageBackground } from "expo-image";
-import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -20,7 +18,6 @@ import { useAuth } from "../../../context/authContext";
 
 
 export default function ProfileScreen() {
-  const router = useRouter();
   const { signOut, user, profile } = useAuth();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
@@ -46,7 +43,6 @@ export default function ProfileScreen() {
   return (
     <View className="flex-1">
       <ImageBackground source={require("../../../assets/images/main-bg-img.jpg")}>
-        <StatusBar style="light" />
         <ScrollView showsVerticalScrollIndicator={false}>
 
           {/* ================= HEADER ================= */}

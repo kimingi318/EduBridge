@@ -4,7 +4,6 @@ import { useAuth } from '@/context/authContext';
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import {
   ImageBackground,
   ScrollView,
@@ -24,7 +23,6 @@ export default function HomeScreen() {
   return (
     <View className="flex-1">
       <ImageBackground source={require("../../../assets/images/main-bg-img.jpg")}>
-        <StatusBar style="light"  />
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* HEADER */}
           <View
@@ -47,7 +45,7 @@ export default function HomeScreen() {
                         : require("../../../assets/images/camera.jpg")
                     }
                   />
-                  <View style={{width:wp(3.5),height:hp(1.5)}} className="absolute right-0 bottom-0  bg-green-500 rounded-full " />
+                  <View style={{width:wp(3.5),height:hp(1.5)}} className="absolute right-1.5 bottom-1 bg-green-500 rounded-full " />
                 </View>
 
                 <View>
