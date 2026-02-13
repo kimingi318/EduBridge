@@ -1,7 +1,7 @@
 import { useAuth } from '@/context/authContext';
 import { Feather } from "@expo/vector-icons";
 import { ImageBackground, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import ImageViewer from '../../../components/ImageViewer';
 
 const ProfileScreen = () => {
@@ -33,6 +33,11 @@ const ProfileScreen = () => {
               {"Admin"}· {profile?.dept || ""}
             </Text>
           </View>
+
+          <View
+            style={{ paddingHorizontal: wp(2), paddingTop: hp(1) }}
+            className="bg-gray-100 rounded-t-[30px]"
+          ></View>
 
         </ScrollView>
       </ImageBackground>
