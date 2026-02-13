@@ -55,10 +55,10 @@ export function RootLayout() {
       }
     }
     else if (!isAuthenticating) {
-      // if (publicRoutes) {
-      //   router.replace("/SignUp");
-      // }
-      if(inApp){
+      if (user === null) {
+        router.replace("/SignUp");
+      }
+      if(!inApp){
         router.replace("/SignIn")
       }
     }
