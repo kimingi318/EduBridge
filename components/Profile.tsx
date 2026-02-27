@@ -38,12 +38,16 @@ export default function Profile({ isVisible, children, onClose }: Props) {
     const [level, setLevel] = useState<string>('');
     const [phoneNumber, setPhoneNumber] = useState<string>('');
     const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
-    const placeholder = require('@/assets/images/camera.jpg')
-    const [regNo ,setRegNo] = useState<string>('')
+    const placeholder = require('@/assets/images/camera.png')
+    const [regNo, setRegNo] = useState<string>('')
     const [departments, setDepartments] = useState<Department[]>([]);
     const [courses, setCourses] = useState<Course[]>([]);
     const [selectedDeptId, setSelectedDeptId] = useState<string | null>(null);
     const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+    const [role, setRole] = useState<string | null>(null);
+    const [aId, setAId] = useState<string>('');
+    const [departmentName, setDepartmentName] = useState<string>('');
+
 
     const { refreshProfile } = useAuth();
 
@@ -69,7 +73,6 @@ export default function Profile({ isVisible, children, onClose }: Props) {
             if (!selectedDeptId) {
                 setCourses([]);
                 setSelectedCourseId(null);
-                setCourseName('');
                 return;
             }
             try {
@@ -110,19 +113,21 @@ export default function Profile({ isVisible, children, onClose }: Props) {
     const handleSaveProfile = async () => {
         const uri = selectedImage
         try {
-            const selectedCourse = courses.find(c => c.id === selectedCourseId);
             const res = await apiFetch(`${API_BASE_URL}/api/profiles`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: fullName,
                     username: userName,
-                    course_name: selectedCourse?.name,
+                    course_name: courseName,
                     level: level,
                     reg_no: regNo,
                     phone: phoneNumber,
                     profileImage: uri,
-                    course_id: selectedCourseId
+                    course_id: selectedCourseId,
+                    A_Id: aId,
+                    department_id:selectedDeptId,
+                    department_name:departmentName
                 }),
             });
             if (res.ok) {
@@ -143,132 +148,242 @@ export default function Profile({ isVisible, children, onClose }: Props) {
             console.error(err);
             Alert.alert("Error", "Failed ! Try Again")
         }
-
     }
-
+    useEffect(() => {
+        const getUserRole = async () => {
+            try {
+                const res = await apiFetch(`${API_BASE_URL}/api/users/me`, {
+                    method: "GET",
+                });
+                if (res.ok) {
+                    const userdata = await res.json();
+                    setRole(userdata.role);
+                }
+            }
+            catch (err) {
+                console.error(err)
+                Alert.alert("error", "cannot get your role")
+            }
+        }
+        getUserRole();
+    }, []);
+    if (!role) return null;
     return (
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={isVisible}
-            onRequestClose={onClose}>
-            <BlurView
-                intensity={70}
-                tint="dark"
-                style={StyleSheet.absoluteFill} />
-            <CustomKeyBoardView>
-
-                <View style={{
-                    height: hp(86),
-                    width: wp(94),
-                    marginHorizontal: wp(3),
-                    marginVertical: hp(7),
-                    padding: hp(1)
-                }}
-                    className='bg-gray-100 rounded-[20px]'>
-                    {/* Header */}
-                    <View className="items-center mb-4">
-                        <View className="bg-blue-100 p-3 rounded-full mb-2">
-                            <Ionicons name="person-circle-outline" size={40} color="#1E40FF" />
-                        </View>
-                        <Text style={styles.header} className=" font-bold">Complete Your Profile</Text>
-                        <Text className="text-gray-500 text-lg text-center mt-1">
-                            Help classmates and lecturers recognize you easily
-                        </Text>
-                    </View>
-                    {/* Profile image */}
-                    <View style={{
-                        height: hp(20),
-                        borderRadius: hp(4),
-                        marginBottom: hp(2)
-                    }}
-                        className="flex-1 bg-blue-100">
-                        <TouchableOpacity onPress={pickImageAsync} className="items-center flex-row   gap-4">
-                            <ImageViewer imgSource={placeholder} selectedImage={selectedImage} />
-                            <View className='flex-1'>
-                                <Text style={{ fontSize: hp(3), fontWeight: 'bold' }}
-                                    className="text-black  mt-1">
-                                    Tap
-                                </Text>
-                                <Text style={{ fontSize: hp(2), fontWeight: 'semibold' }}
-                                    className="text-edublue  mt-1">
-                                    Add profile image URL
+        <>
+            {role === "Student" && (
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isVisible}
+                    onRequestClose={onClose}>
+                    <BlurView
+                        intensity={70}
+                        tint="dark"
+                        style={StyleSheet.absoluteFill} />
+                    <CustomKeyBoardView>
+                        <View style={styles.modals}
+                            className='bg-gray-100 rounded-[20px]'>
+                            {/* Header */}
+                            <View className="items-center mb-4">
+                                <View className="bg-blue-100 p-3 rounded-full mb-2">
+                                    <Ionicons name="person-circle-outline" size={40} color="#1E40FF" />
+                                </View>
+                                <Text style={styles.header} className=" font-bold">Complete Your Profile</Text>
+                                <Text className="text-gray-500 text-lg text-center mt-1">
+                                    Help classmates and lecturers recognize you easily
                                 </Text>
                             </View>
-                        </TouchableOpacity>
+                            {/* Profile image */}
+                            <View style={{
+                                height: hp(20),
+                                borderRadius: hp(4),
+                                marginBottom: hp(2)
+                            }}
+                                className="flex-1 bg-blue-100">
+                                <TouchableOpacity onPress={pickImageAsync} className="items-center flex-row gap-4">
+                                    <ImageViewer imgSource={placeholder} selectedImage={selectedImage} />
+                                    <View className='flex-1'>
+                                        <Text style={{ fontSize: hp(3), fontWeight: 'bold' }}
+                                            className="text-black  mt-1">
+                                            Tap
+                                        </Text>
+                                        <Text style={{ fontSize: hp(2), fontWeight: 'semibold' }}
+                                            className="text-edublue  mt-1">
+                                            Add profile image URL
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                            {/* inputs */}
+                            <TextInput
+                                placeholder='Full Name'
+                                value={fullName}
+                                onChangeText={setFullName}
+                                style={styles.inputs}
+                            />
+                            <TextInput
+                                placeholder='UserName'
+                                value={userName}
+                                onChangeText={setUserName}
+                                style={styles.inputs}
+                            />
+                            <TextInput
+                                placeholder='Reg. No i.e. AB1/12345/26'
+                                value={regNo}
+                                onChangeText={setRegNo}
+                                style={styles.inputs}
+                            />
+                            <Dropdown
+                                style={styles.dropdown}
+                                data={departments}
+                                labelField="name"
+                                valueField="id"
+                                placeholder="Select a department"
+                                value={selectedDeptId}
+                                onChange={(item) => setSelectedDeptId(item.id)}
+                                search
+                                searchPlaceholder="Search department..."
+                            />
+                            <Dropdown
+                                style={styles.dropdown}
+                                data={courses}
+                                labelField="label"
+                                valueField="id"
+                                placeholder="Select a course"
+                                value={selectedCourseId}
+                                onChange={(item) => {
+                                    setSelectedCourseId(item.id);
+                                    setCourseName(item.name);
+                                }}
+                                search
+                                searchPlaceholder="Search course..."
+                                disable={!selectedDeptId}
+                            />
+                            <TextInput
+                                placeholder='Level i.e. III'
+                                value={level}
+                                onChangeText={setLevel}
+                                style={styles.inputs}
+                            />
+                            <TextInput
+                                placeholder='Phone Number i.e. +254712345678'
+                                keyboardType='phone-pad'
+                                value={phoneNumber}
+                                onChangeText={setPhoneNumber}
+                                style={styles.inputs}
+                            />
 
-                    </View>
+                            <GradientButton title='Save Profile' onPress={handleSaveProfile} />
+                        </View>
+                    </CustomKeyBoardView>
+                </Modal>
+            )}
+            {role === "Admin" && (
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isVisible}
+                    onRequestClose={onClose}>
+                    <BlurView
+                        intensity={70}
+                        tint="dark"
+                        style={StyleSheet.absoluteFill} />
+                    <CustomKeyBoardView>
+                        <View  style={styles.modals}
+                            className='bg-gray-100 flex-1 rounded-[20px]'>
+                            {/* Header */}
+                            <View  className="items-center mb-4">
+                                <View className="bg-blue-100 p-3 rounded-full mb-2">
+                                    <Ionicons name="person-circle-outline" size={40} color="#1E40FF" />
+                                </View>
+                                <Text style={styles.header} className=" font-bold">Complete Your Profile</Text>
+                                <Text className="text-gray-500 text-md text-center mt-1">
+                                    Help Students and lecturers recognize you easily
+                                </Text>
+                            </View>
+                            {/* Profile image */}
+                            <View style={{
+                                height: hp(15),
+                                borderRadius: hp(4),
+                                marginBottom: hp(2)
+                            }}
+                            className="bg-blue-100">
+                                <TouchableOpacity onPress={pickImageAsync} className="items-center flex-row  gap-4">
+                                    <ImageViewer imgSource={placeholder} selectedImage={selectedImage} />
+                                    <View className='flex-1'>
+                                        <Text style={{ fontSize: hp(3), fontWeight: 'bold' }}className="text-black  mt-1">Tap</Text>
+                                        <Text style={{ fontSize: hp(2), fontWeight: 'semibold' }}className="text-edublue  mt-1">Add profile image URL</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                            {/* inputs */}
+                            <Dropdown
+                                style={styles.dropdown}
+                                data={departments}
+                                labelField="name"
+                                valueField="id"
+                                placeholder="Select a department"
+                                value={selectedDeptId}
+                                onChange={(item) => {
+                                    setSelectedDeptId(item.id);
+                                    setDepartmentName(item.name);
+                                }}
+                                search
+                                searchPlaceholder="Search department..."
+                            />
+                            <TextInput
+                                placeholder='Full Name'
+                                value={fullName}
+                                onChangeText={setFullName}
+                                style={styles.inputs}
+                            />
+                            <TextInput
+                                placeholder='UserName'
+                                value={userName}
+                                onChangeText={setUserName}
+                                style={styles.inputs}
+                            />
+                            <TextInput
+                                placeholder='Admin ID i.e. A/123'
+                                value={aId}
+                                onChangeText={setAId}
+                                style={styles.inputs}
+                            />
+                            <TextInput
+                                placeholder='Phone Number i.e. +254712345678'
+                                keyboardType='phone-pad'
+                                value={phoneNumber}
+                                onChangeText={setPhoneNumber}
+                                style={styles.inputs}
+                            />
+                            <GradientButton title='Save Profile' onPress={handleSaveProfile} />
+                        </View>
+                    </CustomKeyBoardView>
+                </Modal>
+            )}
 
-                    {/* inputs */}
-                    <TextInput
-                        placeholder='Full Name'
-                        value={fullName}
-                        onChangeText={setFullName}
-                        style={styles.inputs}
-                    />
-                    <TextInput
-                        placeholder='UserName'
-                        value={userName}
-                        onChangeText={setUserName}
-                        style={styles.inputs}
-                    />
-                    <TextInput
-                        placeholder='reg. No i.e. AB1/12345/26'
-                        value={regNo}
-                        onChangeText={setRegNo}
-                        style={styles.inputs}
-                    />
-                    <Dropdown
-                        style={styles.dropdown}
-                        data={departments}
-                        labelField="name"
-                        valueField="id"
-                        placeholder="Select a department"
-                        value={selectedDeptId}
-                        onChange={(item) => setSelectedDeptId(item.id)}
-                        search
-                        searchPlaceholder="Search department..."
-                    />
-                    <Dropdown
-                        style={styles.dropdown}
-                        data={courses}
-                        labelField="label"
-                        valueField="id"
-                        placeholder="Select a course"
-                        value={selectedCourseId}
-                        onChange={(item) => {
-                            setSelectedCourseId(item.id);
-                            setCourseName(item.name);
-                        }}
-                        search
-                        searchPlaceholder="Search course..."
-                        disable={!selectedDeptId}
-                    />
-                    <TextInput
-                        placeholder='Level i.e. III'
-                        value={level}
-                        onChangeText={setLevel}
-                        style={styles.inputs}
-                    />
-                    <TextInput
-                        placeholder='Phone Number i.e. +254712345678'
-                        keyboardType='phone-pad'
-                        value={phoneNumber}
-                        onChangeText={setPhoneNumber}
-                        style={styles.inputs}
-                    />
-
-                    <GradientButton title='Save Profile' onPress={handleSaveProfile} />
-                </View>
-            </CustomKeyBoardView>
-
-        </Modal >
-    )
+            {role === "Lecturer" && (
+                <Modal
+                    animationType="slide"
+                    transparent
+                    visible={isVisible}
+                    onRequestClose={onClose}
+                >
+                    {/* LECTURER MODAL CONTENT */}
+                </Modal>
+            )}
+        </>
+    );
 }
 
-
-
 const styles = StyleSheet.create({
+    modals: {
+        height: hp(86),
+        width: wp(94),
+        marginHorizontal: wp(3),
+        marginVertical: hp(7),
+        padding: hp(1)
+    },
     header: {
         fontSize: hp(2.5),
         fontWeight: 'bold',
