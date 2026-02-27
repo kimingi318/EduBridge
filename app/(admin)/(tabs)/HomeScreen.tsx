@@ -1,21 +1,31 @@
 import AddCourses from '@/components/AddCourses';
+import AddDepartment from '@/components/AddDepartment';
+import AddUnits from '@/components/AddUnits';
+import ProfileAvatar from '@/components/ProfileAvatar';
 import SearchBar from '@/components/searchBar';
 import { useAuth } from '@/context/authContext';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 const HomeScreen = () => {
   const { profile } = useAuth();
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isCourseModalVisible, setIsCourseModalVisible] = useState<boolean>(false);
+  const [isDepartmentModalVisible, setIsDepartmentModalVisible] = useState<boolean>(false);
+  const [isUnitModalVisible, setIsUnitModalVisible] = useState<boolean>(false);
 
   const handleAddCourseModal = () => {
-    setIsModalVisible(true);
+    setIsCourseModalVisible(true);
+  }
+  const handleAddDepartmentModal = () => {
+    setIsDepartmentModalVisible(true);
+  }
+  const handleAddUnitModal = () => {
+    setIsUnitModalVisible(true);
   }
 
   return (
@@ -25,27 +35,17 @@ const HomeScreen = () => {
           <View style={{ marginTop: hp(6) }} className='px-5 flex-1 items-center pb-8'>
             <View className='flex-row items-center justify-between'>
               <View style={{ paddingHorizontal: wp(2) }} className='flex-row items-center'>
-                <View className='relative' style={{ marginRight: hp(2) }}>
-                  <Image
-                    style={{
-                      height: hp(10),
-                      aspectRatio: 1,
-                      borderRadius: 100
-                    }}
-                    source={
-                      profile?.profile_image ? { uri: profile.profile_image } :
-                        require("../../../assets/images/admin-dp.jpg")
-                    }
-                  />
-                  <View style={{ width: wp(3.5), height: hp(1.5) }} className='absolute right-1.5 bottom-1  bg-yellow-400 rounded-full'></View>
-                </View>
-
+                <ProfileAvatar
+                  imageUri={profile?.profile_image}
+                  fallbackImage={require("../../../assets/images/admin-dp.jpg")}
+                  dotColor="#FACC15"
+                />
                 <View>
                   <Text style={{ fontSize: hp(1.5) }} className='text-white font-inter-bold'>
                     Good Morning,{profile?.username || 'Admin'}
                   </Text>
                   <Text style={{ fontSize: hp(1.2) }} className='text-edulightblue font-inter-medium'>
-                    {profile?.department ? `${profile.department}` : 'Edit you profile'}
+                    {profile?.department_name ? `Admin . ${profile.department_name}` : 'Edit you profile'}
                   </Text>
                 </View>
               </View>
@@ -87,27 +87,32 @@ const HomeScreen = () => {
               <ActionCard
                 name="users"
                 Title="Add Departments"
-                action={handleAddCourseModal}
+                action={handleAddDepartmentModal}
               />
               <ActionCard
                 name="users"
                 Title="Add Units"
-                action={handleAddCourseModal}
+                action={handleAddUnitModal}
               />
               <ActionCard
                 name="users"
                 Title="Verify Lecturer"
                 action={handleAddCourseModal}
               />
-              <AddCourses
-                isVisible={isModalVisible}
-                onClose={() => setIsModalVisible(false)}>
-              </AddCourses>
             </View>
+
             <AddCourses
-              isVisible={isModalVisible}
-              onClose={() => setIsModalVisible(false)}>
+              isVisible={isCourseModalVisible}
+              onClose={() => setIsCourseModalVisible(false)}>
             </AddCourses>
+            <AddDepartment
+              isVisible={isDepartmentModalVisible}
+              onClose={() => setIsDepartmentModalVisible(false)}>
+            </AddDepartment>
+            <AddUnits
+              isVisible={isUnitModalVisible}
+              onClose={() => setIsUnitModalVisible(false)}>
+            </AddUnits>
             <Text style={styles.header} className='text-black font-inter-semibold'>Alert & Approvals</Text>
             <View>
               <AlertCard
@@ -132,20 +137,20 @@ const HomeScreen = () => {
             <Text style={styles.header} className='text-black font-inter-semibold'>Recent Activity</Text>
             <View>
               <ActivityCard
-                  Title='New Lecturer approved'
-                  action={""}
+                Title='New Lecturer approved'
+                action={""}
               />
               <ActivityCard
-                  Title='New memo added'
-                  action={""}
+                Title='New memo added'
+                action={""}
               />
               <ActivityCard
-                  Title='Student account limited'
-                  action={""}
+                Title='Student account limited'
+                action={""}
               />
               <ActivityCard
-                  Title='New Lecturer approved'
-                  action={""}
+                Title='New Lecturer approved'
+                action={""}
               />
             </View>
           </View>
@@ -267,10 +272,10 @@ function ActivityCard({
     <TouchableOpacity onPress={action}>
       <View style={{ height: hp(7), padding: hp(1), marginBottom: hp(1) }} className=' bg-white flex-row  rounded-[20px] items-center'>
         <View className='rounded-lg bg-edulightblue p-1.5'>
-          <MaterialIcons name="admin-panel-settings" size={24} color="blue" /> 
+          <MaterialIcons name="admin-panel-settings" size={24} color="blue" />
         </View>
-          {/* <Text style={{ fontSize: hp(2) }} className='font-inter-medium'>{type}</Text> */}
-        <Text style={{ fontSize: hp(1.5),marginLeft: hp(2) }} className='font-inter-light'>{Title}</Text>
+        {/* <Text style={{ fontSize: hp(2) }} className='font-inter-medium'>{type}</Text> */}
+        <Text style={{ fontSize: hp(1.5), marginLeft: hp(2) }} className='font-inter-light'>{Title}</Text>
       </View>
     </TouchableOpacity>
   );
