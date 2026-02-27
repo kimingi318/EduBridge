@@ -1,4 +1,5 @@
 import Profile from "@/components/Profile";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { ImageBackground } from "expo-image";
 import { useEffect, useState } from "react";
@@ -13,7 +14,6 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp
 } from "react-native-responsive-screen";
-import ImageViewer from '../../../components/ImageViewer';
 import { useAuth } from "../../../context/authContext";
 
 
@@ -38,8 +38,6 @@ export default function ProfileScreen() {
     setIsModalVisible(true);
   }
 
-  const placeholder = require('@/assets/images/camera.jpg')
-
   return (
     <View className="flex-1">
       <ImageBackground source={require("../../../assets/images/main-bg-img.jpg")}>
@@ -56,9 +54,11 @@ export default function ProfileScreen() {
             </TouchableOpacity>
 
             {/*Profile Picture */}
-            <View >
-              <ImageViewer imgSource={placeholder} selectedImage={profile?.profile_image} />
-            </View>
+            <ProfileAvatar
+              imageUri={profile?.profile_image}
+              fallbackImage={require("../../../assets/images/student-dp.jpeg")}
+              dotColor="#22C55E"   // green
+            />
 
             {/* Name */}
             <Text className="text-white"

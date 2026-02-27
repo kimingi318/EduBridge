@@ -1,3 +1,4 @@
+import ProfileAvatar from "@/components/ProfileAvatar";
 import ScheduleCard from "@/components/schedule";
 import SearchBar from "@/components/searchBar";
 import { useAuth } from '@/context/authContext';
@@ -30,29 +31,19 @@ export default function HomeScreen() {
             className="px-5 flex-1 items-center pb-8 "
           >
             <View className="flex-row items-center justify-between">
-              <View style={{paddingHorizontal:wp(2)}}
-              className="flex-row items-center ">
-                <View className="relative" style={{ marginRight: hp(2) }}>
-                  <Image
-                    style={{
-                      height: hp(10),
-                      aspectRatio: 1,
-                      borderRadius: 100,
-                    }}
-                    source={
-                      profile?.profile_image
-                        ? { uri: profile.profile_image }
-                        : require("../../../assets/images/camera.jpg")
-                    }
-                  />
-                  <View style={{width:wp(3.5),height:hp(1.5)}} className="absolute right-1.5 bottom-1 bg-green-500 rounded-full " />
-                </View>
+              <View style={{ paddingHorizontal: wp(2) }}
+                className="flex-row items-center ">
+                <ProfileAvatar
+                  imageUri={profile?.profile_image}
+                  fallbackImage={require("../../../assets/images/student-dp.jpeg")}
+                  dotColor="#22C55E"   // green
+                />
 
                 <View>
-                  <Text style={{fontSize:hp(1.5)}} className="text-white   font-inter-bold">
+                  <Text style={{ fontSize: hp(1.5) }} className="text-white   font-inter-bold">
                     Good morning, {profile?.username || 'Student'}
                   </Text>
-                  <Text style={{fontSize:hp(1.5)}} className="text-blue-200  font-inter">
+                  <Text style={{ fontSize: hp(1.5) }} className="text-blue-200  font-inter">
                     {profile?.level || ''} {profile?.course_name ? `· ${profile.course_name}` : 'Go to Profile and update profile'}
                   </Text>
                 </View>
@@ -87,7 +78,7 @@ export default function HomeScreen() {
                 <Text className="bg-edulightblue text-edublue px-4 py-1 rounded-full text-xs">
                   Social
                 </Text>
-                <Text className="text-edublue font-semibold" onPress={()=> router.push("/NotificationScreen")}>See all</Text>
+                <Text className="text-edublue font-semibold" onPress={() => router.push("/NotificationScreen")}>See all</Text>
               </View>
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -129,7 +120,7 @@ export default function HomeScreen() {
             <View className="mt-4 mb-10">
               <View className="flex-row justify-between mb-3">
                 <Text className="text-titles font-bold">Memos</Text>
-                  <Text className="text-edublue font-semibold" onPress={()=> router.push("/NotificationScreen")}>See all</Text>
+                <Text className="text-edublue font-semibold" onPress={() => router.push("/NotificationScreen")}>See all</Text>
               </View>
 
               <Memo
