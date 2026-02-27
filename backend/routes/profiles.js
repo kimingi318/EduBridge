@@ -49,7 +49,7 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
       course_id,
 
       //compulsory for Admins
-      A_id,
+      A_Id,
       department_name,
       department_id,
 
@@ -98,7 +98,7 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
         reg_no || null,
         username,
         course_id || null,
-        A_id || null,
+        A_Id || null,
         department_name || null,
         department_id || null,
         L_Id || null,
@@ -141,37 +141,3 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
 });
 
 export default router;
-
-// try {
-// const {
-//   name,
-//   phone,
-//   profileImage,
-//   level,
-//   course_name,
-//   reg_no,
-//   username,
-//   course_id,
-// } = req.body;
-
-//   await db.query(
-//     "INSERT INTO profiles (id,firebase_uid, name, phone, profile_image, level,course_name,reg_no,username,course_id) VALUES (?, ?,?, ?, ?, ?,?,?,?,?)",
-//     [
-//       randomUUID(),
-//       req.user.uid,
-//       name,
-//       phone,
-//       profileImage,
-//       level,
-//       course_name,
-//       reg_no,
-//       username,
-//       course_id,
-//     ],
-//   );
-
-//   res.json({ success: true });
-// } catch (error) {
-//   console.error("Error saving profile:", error);
-//   res.status(500).json({ error: error.message });
-// }
