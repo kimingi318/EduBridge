@@ -1,7 +1,9 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import React, { useEffect, useState } from "react";
+import { BlurView } from 'expo-blur';
+import { PropsWithChildren, useEffect, useState } from "react";
 import {
     Alert,
+    Modal,
     StyleSheet,
     Text,
     TextInput,
@@ -29,8 +31,12 @@ type Course = {
     id: string;
     name: string;
 };
+type Props = PropsWithChildren<{
+    isVisible: boolean;
+    onClose: () => void;
+}>;
 
-const AddUnits = () => {
+export default function AddUnits({ isVisible, children, onClose }: Props) {
     const [faculties, setFaculties] = useState<Faculty[]>([]);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [courses, setCourses] = useState<Course[]>([]);
@@ -136,81 +142,89 @@ const AddUnits = () => {
 
     }
     return (
-        <View style={styles.container}>
-            <View className="flex-row items-center" style={{ gap: wp(1) }}>
-                <FontAwesome name="puzzle-piece" size={24} color="#1E5EFF" />
-                <Text style={styles.header}>Add Units</Text>
+        <Modal
+            visible={isVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={onClose}>
+            <BlurView
+                intensity={70}
+                tint="dark"
+                style={StyleSheet.absoluteFill} />
+            <View style={styles.container}>
+                <View className="flex-row items-center" style={{ gap: wp(1) }}>
+                    <FontAwesome name="puzzle-piece" size={24} color="#1E5EFF" />
+                    <Text style={styles.header}>Add Units</Text>
+                </View>
+
+                {/* Faculty */}
+                <Dropdown
+                    style={styles.dropdown}
+                    data={faculties}
+                    labelField="name"
+                    valueField="id"
+                    placeholder="Select Faculty"
+                    value={facultyValue}
+                    onChange={(item) => {
+                        setFacultyValue(item.id);
+                    }}
+                />
+
+                {/* Department */}
+                <Dropdown
+                    style={styles.dropdown}
+                    data={departments}
+                    labelField="name"
+                    valueField="id"
+                    placeholder="Select Department"
+                    value={departmentValue}
+                    disable={!facultyValue}
+                    onChange={(item) => {
+                        setDepartmentValue(item.id);
+                    }}
+                />
+
+                {/* Course */}
+                <Dropdown
+                    style={styles.dropdown}
+                    data={courses}
+                    labelField="name"
+                    valueField="id"
+                    placeholder="Select Course"
+                    value={courseValue}
+                    disable={!departmentValue}
+                    onChange={(item) => {
+                        setCourseValue(item.id);
+                    }}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Unit name"
+                    value={unitName}
+                    onChangeText={setUnitName}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Unit Code"
+                    value={code}
+                    onChangeText={setCode}
+                />
+                <GradientButton title={loading ? "Adding..." : "Add Unit"}
+                    onPress={handleAddUnit} />
             </View>
-
-            {/* Faculty */}
-            <Dropdown
-                style={styles.dropdown}
-                data={faculties}
-                labelField="name"
-                valueField="id"
-                placeholder="Select Faculty"
-                value={facultyValue}
-                onChange={(item) => {
-                    setFacultyValue(item.id);
-                }}
-            />
-
-            {/* Department */}
-            <Dropdown
-                style={styles.dropdown}
-                data={departments}
-                labelField="name"
-                valueField="id"
-                placeholder="Select Department"
-                value={departmentValue}
-                disable={!facultyValue}
-                onChange={(item) => {
-                    setDepartmentValue(item.id);
-                }}
-            />
-
-            {/* Course */}
-            <Dropdown
-                style={styles.dropdown}
-                data={courses}
-                labelField="name"
-                valueField="id"
-                placeholder="Select Course"
-                value={courseValue}
-                disable={!departmentValue}
-                onChange={(item) => {
-                    setCourseValue(item.id);
-                }}
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Unit name"
-                value={unitName}
-                onChangeText={setUnitName}
-            />
-            <TextInput
-                style={styles.input}
-                placeholder="Unit Code"
-                value={code}
-                onChangeText={setCode}
-            />
-            <GradientButton title={loading ? "Adding..." : "Add Unit"}
-                onPress={handleAddUnit} />
-        </View>
+        </Modal>
     );
 };
 
-export default AddUnits;
-
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: "#F5F7FB",
-        flex: 1,
-        paddingTop: hp(1.5),
-        paddingHorizontal: wp(2),
-        borderTopEndRadius: 30,
-        borderTopStartRadius: 30,
-        marginTop: hp(2),
+        backgroundColor: "#F8FAFC",
+        paddingBottom: hp(1),
+        paddingHorizontal: wp(1.5),
+        borderRadius: 30,
+        marginTop: hp(10),
+        marginHorizontal: wp(2),
+        height: hp(50)
     },
     header: {
         fontSize: hp(2.5),

@@ -1,24 +1,31 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import React, { useEffect, useState } from "react";
+import { BlurView } from 'expo-blur';
+import { PropsWithChildren, useEffect, useState } from "react";
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { API_BASE_URL, apiFetch } from "../utils/api";
 import GradientButton from "./GradientButton";
 
+
 type Faculty = {
   id: string;
   name: string;
   abbv: string;
 };
+type Props = PropsWithChildren<{
+  isVisible: boolean;
+  onClose: () => void;
+}>;
 
-const AddDepartment = () => {
+export default function AddDepartment({ isVisible, children, onClose }: Props) {
   const [deptName, setDeptName] = useState("");
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [facultyValue, setFacultyValue] = useState<string | null>(null);
@@ -74,54 +81,62 @@ const AddDepartment = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View className="flex-row items-center" style={{ gap: wp(1) }}>
-        <Octicons name="stack" size={24} color="#1E5EFF" />
-        <Text style={styles.header}>Add Department</Text>
+    <Modal
+      visible={isVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}>
+      <BlurView
+        intensity={70}
+        tint="dark"
+        style={StyleSheet.absoluteFill} />
+      <View style={styles.container}>
+        {/* Header */}
+        <View className="flex-row items-center" style={{ gap: wp(1) }}>
+          <Octicons name="stack" size={24} color="#1E5EFF" />
+          <Text style={styles.header}>Add Department</Text>
+        </View>
+
+        {/* Faculty Dropdown */}
+        <Dropdown
+          style={styles.dropdown}
+          data={faculties}
+          labelField="name"
+          valueField="id"
+          placeholder="Select a faculty"
+          value={facultyValue}
+          onChange={(item) => setFacultyValue(item.id)}
+          search
+          searchPlaceholder="Search faculty..."
+        />
+
+        {/* Department Name */}
+        <TextInput
+          style={styles.input}
+          placeholder="Department name"
+          value={deptName}
+          onChangeText={setDeptName}
+        />
+
+        {/* Submit */}
+        <GradientButton
+          title={loading ? "Adding..." : "Add Department"}
+          onPress={handleAddDepartment}
+        />
       </View>
-
-      {/* Faculty Dropdown */}
-      <Dropdown
-        style={styles.dropdown}
-        data={faculties}
-        labelField="name"
-        valueField="id"
-        placeholder="Select a faculty"
-        value={facultyValue}
-        onChange={(item) => setFacultyValue(item.id)}
-        search
-        searchPlaceholder="Search faculty..."
-      />
-
-      {/* Department Name */}
-      <TextInput
-        style={styles.input}
-        placeholder="Department name"
-        value={deptName}
-        onChangeText={setDeptName}
-      />
-
-      {/* Submit */}
-      <GradientButton
-        title={loading ? "Adding..." : "Add Department"}
-        onPress={handleAddDepartment}
-      />
-    </View>
+    </Modal>
   );
 };
 
-export default AddDepartment;
-
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#F5F7FB",
-    flex: 1,
-    paddingTop: hp(1.5),
-    paddingHorizontal: wp(2),
-    borderTopEndRadius: 30,
-    borderTopStartRadius: 30,
-    marginTop: hp(2),
+    backgroundColor: "#F8FAFC",
+    paddingBottom: hp(1.5),
+    paddingHorizontal: wp(1.5),
+    borderRadius: 30,
+    marginTop: hp(10),
+    marginHorizontal: wp(2),
+    height: hp(30)
   },
   header: {
     fontSize: hp(2.5),
