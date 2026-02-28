@@ -38,6 +38,7 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
       name,
       phone,
       username,
+      department_id,
 
       //Optional
       profileImage,
@@ -51,7 +52,6 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
       //compulsory for Admins
       A_Id,
       department_name,
-      department_id,
 
       //compulsory for Lecturer
       L_Id,

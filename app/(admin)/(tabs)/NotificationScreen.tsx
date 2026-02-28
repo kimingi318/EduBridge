@@ -1,5 +1,4 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { StatusBar } from 'expo-status-bar';
 import { useState } from "react";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
 
@@ -63,8 +62,6 @@ const NotificationsScreen = () => {
 
   return (
     <View className="flex-1 bg-gray-100">
-            <StatusBar style="dark" />
-
       {/* HEADER */}
       <View className="bg-white px-5 pt-6 pb-4 rounded-b-3xl">
         <View className="flex-row justify-between items-center">

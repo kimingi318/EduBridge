@@ -4,10 +4,12 @@ import AddUnits from '@/components/AddUnits';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import SearchBar from '@/components/searchBar';
 import { useAuth } from '@/context/authContext';
+import { getDepartmentStats } from "@/utils/api";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -27,6 +29,10 @@ const HomeScreen = () => {
   const handleAddUnitModal = () => {
     setIsUnitModalVisible(true);
   }
+  const { data: departmentStats, isLoading } = useQuery({
+    queryKey: ["departmentStats"],
+    queryFn: getDepartmentStats,
+  });
 
   return (
     <View className='flex-1 '>
@@ -59,17 +65,17 @@ const HomeScreen = () => {
               <Departmentcard
                 title="Total Student"
                 name="users"
-                number="1042"
+                number={isLoading ? "..." :String(departmentStats?.students || 0)}
               />
               <Departmentcard
                 title="Total Lecturer"
                 name="mortar-board"
-                number="44"
+                number={isLoading ? "..." :String(departmentStats?.lecturers || 0)}
               />
               <Departmentcard
                 title="Total Courses"
                 name="users"
-                number="10"
+                number={isLoading ? "..." :String(departmentStats?.courses || 0)}
               />
               <Departmentcard
                 title="Requests"
@@ -78,7 +84,7 @@ const HomeScreen = () => {
               />
             </View>
             <Text style={styles.header} className='text-black font-inter-semibold'>Management</Text>
-            <View style={styles.container} className=' flex-row gap-1 w-full '>
+            <View style={styles.container} className=' flex-row justify-between w-full '>
               <ActionCard
                 name="users"
                 Title="Add Courses"

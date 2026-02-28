@@ -1,5 +1,6 @@
 
 import { FontAwesome } from '@expo/vector-icons';
+import { useQueryClient } from "@tanstack/react-query";
 import { BlurView } from 'expo-blur';
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -28,7 +29,8 @@ export default function AddCourses({ isVisible, children, onClose }: Props) {
     const [loading, setLoading] = useState(false);
     const [programme, setProgramme] = useState("");
     const [courseName, setCourseName] = useState("");
-    // const [dept_Id, setDept_Id] = useState("");
+    const queryClient = useQueryClient();
+
 
     useEffect(() => {
         const handleGetDepartments = async () => {
@@ -68,6 +70,8 @@ export default function AddCourses({ isVisible, children, onClose }: Props) {
             } else {
                 Alert.alert("Error", "Failed to add Course");
             }
+            queryClient.invalidateQueries({ queryKey: ["departmentStats"] });
+
         }
         catch (err) {
             console.error(err);

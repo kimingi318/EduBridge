@@ -1,10 +1,14 @@
 import ScreenWrapper from "@/components/ScreenWrapper";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen, useRouter, useSegments } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { useColorScheme } from 'react-native';
 import { MenuProvider } from "react-native-popup-menu";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthContextProvider, useAuth } from "../context/authContext";
+
 
 export function RootLayout() {
   const { user } = useAuth()
@@ -36,7 +40,6 @@ export function RootLayout() {
   useEffect(() => {
     if (typeof isAuthenticating === "undefined") return;
     const inApp = segments[0] === "(admin)" || segments[0] === "(lecturer)" || segments[0] === "(student)";
-    // const publicRoutes = segments[0] === "LandingPage" || segments[0] === "SignIn" || segments[0] === "SignUp"
     if (isAuthenticating) {
       if (!user) return;
       if (!inApp) {
@@ -58,7 +61,7 @@ export function RootLayout() {
       if (user === null) {
         router.replace("/SignUp");
       }
-      if(!inApp){
+      if (!inApp) {
         router.replace("/SignIn")
       }
     }
@@ -66,16 +69,27 @@ export function RootLayout() {
   return <Slot />;
 }
 
+
+
 export default function RootNavigator() {
+  const isDark = useColorScheme();
+
   return (
-    <MenuProvider>
-      <AuthContextProvider>
-        <ScreenWrapper>
-        <SafeAreaProvider>
-          <RootLayout />
-        </SafeAreaProvider>
-        </ScreenWrapper>
-      </AuthContextProvider>
-    </MenuProvider>
+    <QueryClientProvider client={new QueryClient()}>
+      <MenuProvider>
+        <AuthContextProvider>
+          <ScreenWrapper>
+            <SafeAreaProvider>
+              <>
+                <StatusBar style={isDark=== 'dark'? 'light': 'dark'}
+                backgroundColor={isDark === "dark" ? "#000000" : "#ffffff"}
+                 animated/>
+                <RootLayout />
+              </>
+            </SafeAreaProvider>
+          </ScreenWrapper>
+        </AuthContextProvider>
+      </MenuProvider>
+    </QueryClientProvider>
   );
 }

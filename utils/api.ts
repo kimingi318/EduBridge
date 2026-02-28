@@ -17,3 +17,17 @@ export const apiFetch = async (url: string, options: RequestInit = {}) => {
     },
   });
 };
+// export const getDepartmentStats = async () => {
+//   return apiFetch(`${API_BASE_URL}/department/stats`);
+// };
+export const getDepartmentStats = async () => {
+  const res = await apiFetch(`${API_BASE_URL}/api/departmentStats/stats`, {
+    method: "GET",
+  });
+
+  if (res.ok) {
+    return res.json();
+  } else {
+    throw new Error("Failed to fetch department stats");
+  }
+};

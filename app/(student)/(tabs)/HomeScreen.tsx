@@ -56,6 +56,7 @@ export default function HomeScreen() {
           {/* CONTENT */}
           <View className="bg-gray-100 -mt-6 rounded-t-[30px] px-5 pt-6">
             {/* TODAY'S SCHEDULE */}
+            <Text className="text-titles font-bold">Todays Schedule</Text>
             <View>
               <ScheduleCard
                 courseTitle="Cryptography & Computer Security"

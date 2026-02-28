@@ -6,6 +6,7 @@ import { db } from "./db.js";
 import attendanceRouter from "./routes/attendance.js";
 import coursesRouter from "./routes/courses.js";
 import departmentsRouter from "./routes/departments.js";
+import departmentStatsRouter from "./routes/departmentStats.js";
 import facultiesRouter from "./routes/faculties.js";
 import lecturersRouter from "./routes/lecturers.js";
 import profileRouter from "./routes/profiles.js";
@@ -29,6 +30,7 @@ app.use("/api/lecturers", lecturersRouter);
 app.use("/api/sessions", sessionsRouter);
 app.use("/api/attendance", attendanceRouter);
 app.use("/api/profiles", profileRouter);
+app.use("/api/departmentStats", departmentStatsRouter);
 
 app.listen(process.env.PORT, () => {
   console.log(`EduBridge backend running on port ${process.env.PORT}`);

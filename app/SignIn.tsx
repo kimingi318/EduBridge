@@ -1,8 +1,7 @@
 import icons from "@/constants/icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Image,
@@ -40,7 +39,6 @@ export default function SignIn() {
   };
   return (
     <CustomKeyBoardView>
-      <StatusBar style="light" />
       <ImageBackground
         source={require("../assets/images/student-signup-img.jpg")}
         className=" w-full"

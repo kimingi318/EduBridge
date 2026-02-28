@@ -1,5 +1,4 @@
 import { router } from "expo-router";
-import { StatusBar } from 'expo-status-bar';
 import { Text, View } from "react-native";
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import EduLogo from "../components/EduLogo";
@@ -9,7 +8,6 @@ import "./globals.css";
 export default function LandingPage() {
   return (
     <View className="flex-1 h-full p-6">
-      <StatusBar style = 'dark'/>
             {/*Logo */}
       <View style={{marginTop: hp(8), marginBottom: hp(4)}} className=" rounded-sm items-center">
         <EduLogo

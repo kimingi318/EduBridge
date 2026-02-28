@@ -3,7 +3,6 @@ import GradientButton from "@/components/GradientButton";
 import icons from "@/constants/icons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Link, router } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
   Alert,
@@ -62,7 +61,6 @@ export default function SignUp() {
   };
   return (
     <CustomKeyBoardView>
-      <StatusBar style="dark" />
       {/* Header Image */}
       <ImageBackground
         source={require("../assets/images/student-signin-img.jpg")}
