@@ -1,10 +1,13 @@
+import ClassCarousel from "@/components/ClassCarousel";
 import ProfileAvatar from "@/components/ProfileAvatar";
-import ScheduleCard from "@/components/schedule";
 import SearchBar from "@/components/searchBar";
 import { useAuth } from '@/context/authContext';
+import { API_BASE_URL, apiFetch } from "@/utils/api";
+import { getTimeRemaining } from '@/utils/time';
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ImageBackground,
   ScrollView,
@@ -18,6 +21,51 @@ import { blurhash } from "../../../utils/common";
 export default function HomeScreen() {
   const router = useRouter();
   const { profile } = useAuth();
+  const [sessions, setSessions] = useState<any[]>([]); // raw sessions from backend
+
+  useEffect(() => {
+    if (!profile) return;
+    if (!profile.course_id) {
+      setSessions([]);
+      return;
+    }
+    const fetchSchedule = async () => {
+      try {
+        const res = await apiFetch(`${API_BASE_URL}/api/sessions/by-course/${profile.course_id}`, {
+          method: 'GET',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSessions(data || []);
+        }
+      } catch (err) {
+        console.error(err);
+        setSessions([]);
+      }
+    };
+    fetchSchedule();
+  }, [profile]);
+
+// Get today's day name (Monday, Tuesday...)
+function getTodayName() {
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  return days[new Date().getDay()];
+}
+
+// Filter & sort today's sessions
+const todayName = getTodayName();
+
+const todaysSessions = sessions
+  .filter((s) => s.day_of_week === todayName)
+  .sort((a, b) => a.start_time.localeCompare(b.start_time));
 
 
 
@@ -57,16 +105,24 @@ export default function HomeScreen() {
           <View className="bg-gray-100 -mt-6 rounded-t-[30px] px-5 pt-6">
             {/* TODAY'S SCHEDULE */}
             <Text className="text-titles font-bold">Todays Schedule</Text>
-            <View>
-              <ScheduleCard
-                courseTitle="Cryptography & Computer Security"
-                timePeriod="10:00 – 13:00"
-                lecturerName="Dr Mwathi"
-                classLocation="BSR 303"
-                isOnline={false}
-                startsIn="20 mins"
-                status="NEXT"
-              />
+                        <View>
+              {todaysSessions.length > 0 ? (
+                <ClassCarousel
+                  sessions={todaysSessions.map((s) => ({
+                    id: s.id,
+                    courseTitle: s.unit_name || '',
+                    timePeriod: `${s.start_time} – ${s.end_time}`,
+                    lecturerName: s.lecturer_name || '',
+                    classLocation: s.venue || '',
+                    isOnline: false,
+                    status: s.status || 'NEXT',
+                    startsIn: getTimeRemaining(s.start_time),
+                  }))}
+                  role="student"
+                />
+              ) : (
+                <Text className="text-gray-500 mt-2">No schedule Today</Text>
+              )}
             </View>
 
             {/* EVENTS */}
@@ -178,3 +234,4 @@ function Memo({
     </View>
   );
 }
+
