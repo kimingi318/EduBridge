@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
 import { PropsWithChildren, useEffect, useState } from 'react';
-import { Alert, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import GradientButton from './GradientButton';
@@ -45,10 +45,13 @@ export default function Profile({ isVisible, children, onClose }: Props) {
     const [courses, setCourses] = useState<Course[]>([]);
     const [selectedDeptId, setSelectedDeptId] = useState<string | null>(null);
     const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+    const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
     const [role, setRole] = useState<string | null>(null);
     const [aId, setAId] = useState<string>('');
     const [departmentName, setDepartmentName] = useState<string>('');
+    const [lId, setLId] = useState<string>('');
     const queryClient = useQueryClient();
+    const [showCourses, setShowCourses] = useState(false);
 
 
     const { refreshProfile } = useAuth();
@@ -115,21 +118,42 @@ export default function Profile({ isVisible, children, onClose }: Props) {
     const handleSaveProfile = async () => {
         const uri = selectedImage
         try {
+            let lecturerCoursesPayload: any[] = [];
+
+            if (role === "Lecturer") {
+                if (selectedCourses.length === 0) {
+                    Alert.alert("Error", "Select at least one course");
+                    return;
+                }
+
+                lecturerCoursesPayload = selectedCourses.map((id, index) => ({
+                    course_id: id,
+                    is_main: index === 0 // first course is main
+                }));
+            }
             const res = await apiFetch(`${API_BASE_URL}/api/profiles`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: fullName,
                     username: userName,
+                    phone: phoneNumber,
+                    profileImage: uri,
+
+                    //student
                     course_name: courseName,
                     level: level,
                     reg_no: regNo,
-                    phone: phoneNumber,
-                    profileImage: uri,
                     course_id: selectedCourseId,
+
+                    //admin
                     A_Id: aId,
                     department_id: selectedDeptId,
-                    department_name: departmentName
+                    department_name: departmentName,
+
+                    //lecturer
+                    L_Id: lId,
+                    courses: lecturerCoursesPayload
                 }),
             });
             if (res.ok) {
@@ -143,7 +167,9 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                 if (onClose) onClose();
             }
             else {
-                Alert.alert("Error", "Unkown Error Occured")
+                const errorData = await res.json();
+                console.error('Profile save error:', errorData);
+                Alert.alert("Error", errorData?.message || "Unknown Error Occurred")
             }
             queryClient.invalidateQueries({ queryKey: ["departmentStats"] });
         }
@@ -400,10 +426,148 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                         onChange={(item) => {
                             setSelectedDeptId(item.id);
                             setDepartmentName(item.name);
+                            setSelectedCourses([]);
                         }}
                         search
                         searchPlaceholder="Search department..."
                     />
+
+                    {/* Course Selector */}
+                    {selectedDeptId && (
+                        <>
+                            <Text className="mb-1 font-semibold text-gray-700">
+                                Select Courses
+                            </Text>
+
+                            {/* Selected Courses Display (Flex Row) */}
+                            <TouchableOpacity
+                                onPress={() => setShowCourses(!showCourses)}
+                                style={{
+                                    minHeight: hp(6),
+                                    borderWidth: 1,
+                                    borderColor: "#6b7280",
+                                    borderRadius: hp(2),
+                                    padding: hp(1),
+                                    justifyContent: "center",
+                                    marginBottom: hp(1),
+                                }}
+                            >
+                                {selectedCourses.length === 0 ? (
+                                    <Text className="text-gray-400">
+                                        Tap to select courses
+                                    </Text>
+                                ) : (
+                                    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+                                        {selectedCourses.map((id, index) => {
+                                            const course = courses.find(c => c.id === id);
+                                            if (!course) return null;
+
+                                            return (
+                                                <View
+                                                    key={id}
+                                                    style={{
+                                                        backgroundColor: "#dbeafe",
+                                                        paddingHorizontal: 10,
+                                                        paddingVertical: 4,
+                                                        borderRadius: 20,
+                                                        marginBottom: 5,
+                                                    }}
+                                                >
+                                                    <Text style={{ fontSize: hp(1.6) }}>
+                                                        {course.name}
+                                                        {index === 0 && " (Main)"}
+                                                    </Text>
+                                                </View>
+                                            );
+                                        })}
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+
+                            {/* Expandable Course List */}
+                            {showCourses && (
+                                <View
+                                    style={{
+                                        height: hp(25),
+                                        borderWidth: 1,
+                                        borderColor: "#6b7280",
+                                        borderRadius: hp(2),
+                                        marginBottom: hp(2),
+                                        overflow: "hidden",
+                                    }}
+                                >
+                                    <ScrollView
+                                        nestedScrollEnabled
+                                        contentContainerStyle={{ padding: hp(1) }}
+                                    >
+                                        {courses.map((course) => {
+                                            const isSelected = selectedCourses.includes(course.id);
+
+                                            return (
+                                                <TouchableOpacity
+                                                    key={course.id}
+                                                    onPress={() => {
+                                                        if (isSelected) {
+                                                            setSelectedCourses(prev =>
+                                                                prev.filter(id => id !== course.id)
+                                                            );
+                                                        } else {
+                                                            setSelectedCourses(prev => [
+                                                                ...prev,
+                                                                course.id,
+                                                            ]);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        padding: hp(1.2),
+                                                        borderRadius: hp(1.5),
+                                                        marginBottom: hp(1),
+                                                        borderWidth: 1,
+                                                        borderColor: isSelected
+                                                            ? "#3b82f6"
+                                                            : "#d1d5db",
+                                                        backgroundColor: isSelected
+                                                            ? "#dbeafe"
+                                                            : "#ffffff",
+                                                    }}
+                                                >
+                                                    <Text>
+                                                        {course.programme
+                                                            ? `${course.programme} - ${course.name}`
+                                                            : course.name}
+                                                    </Text>
+
+                                                    {isSelected &&
+                                                        selectedCourses[0] === course.id && (
+                                                            <Text
+                                                                style={{ fontSize: hp(1.6) }}
+                                                                className="text-green-600 mt-1"
+                                                            >
+                                                                Main Course
+                                                            </Text>
+                                                        )}
+                                                </TouchableOpacity>
+                                            );
+                                        })}
+                                    </ScrollView>
+
+                                    {/* Done Button */}
+                                    <TouchableOpacity
+                                        onPress={() => setShowCourses(false)}
+                                        style={{
+                                            backgroundColor: "#1E40FF",
+                                            padding: hp(1.5),
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <Text style={{ color: "white", fontWeight: "bold" }}>
+                                            Done
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </>
+                    )}
 
                     {/* Full Name */}
                     <TextInput
@@ -424,16 +588,8 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                     {/* Staff ID */}
                     <TextInput
                         placeholder="Staff ID i.e. LEC/203"
-                        value={aId}
-                        onChangeText={setAId}
-                        style={styles.inputs}
-                    />
-
-                    {/* Office Location */}
-                    <TextInput
-                        placeholder="Office Location i.e. Block B Room 12"
-                        value={courseName}
-                        onChangeText={setCourseName}
+                        value={lId}
+                        onChangeText={setLId}
                         style={styles.inputs}
                     />
 
@@ -462,7 +618,8 @@ const styles = StyleSheet.create({
         width: wp(94),
         marginHorizontal: wp(3),
         marginVertical: hp(7),
-        padding: hp(1)
+        padding: hp(1),
+        overflow: 'hidden',
     },
     header: {
         fontSize: hp(2.5),
@@ -506,7 +663,7 @@ const ProfileModalWrapper = ({
         />
         <CustomKeyBoardView>
             <View style={styles.modals} className="bg-gray-100 rounded-[20px]">
-                {children}
+                    {children}
             </View>
         </CustomKeyBoardView>
     </Modal>
