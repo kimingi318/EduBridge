@@ -16,6 +16,19 @@ router.get("/me", verifyFirebaseToken, async (req, res) => {
   res.json(rows[0] || null);
 });
 
+router.get(
+  "/by-department/:department_Id",
+  verifyFirebaseToken,
+  async (req, res) => {
+    const { department_Id } = req.params;
+    const [rows] = await db.query(
+      "SELECT name,id,L_Id FROM profiles WHERE department_id = ?",
+      [department_Id],
+    );
+    res.json(rows);
+  },
+);
+
 router.post("/", verifyFirebaseToken, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
@@ -61,7 +74,7 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
     const roleRequirements = {
       Student: ["reg_no", "level", "course_name", "course_id"],
       Admin: ["A_Id", "department_name", "department_id"],
-      Lecturer: ["L-Id", "courses"],
+      Lecturer: ["L_Id", "courses"],
     };
 
     const requiredFields = roleRequirements[role] || [];
@@ -112,13 +125,17 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
         });
       }
 
-      const mainCourses = course_id.filter((c) => c.is_main === true);
+      // ensure we have an array before filtering
+      const selectedCoursesArray = Array.isArray(courses) ? courses : [];
+      const mainCourses = selectedCoursesArray.filter(
+        (c) => c.is_main === true,
+      );
       if (mainCourses.length !== 1) {
         return res.status(400).json({
-          error: " Exactly one main course must be selected",
+          error: "Exactly one main course must be selected",
         });
       }
-      for (let course of courses) {
+      for (let course of selectedCoursesArray) {
         await db.query(
           `INSERT INTO  lecturer_courses
           (id,lecturer_id, course_id, is_main)
@@ -136,7 +153,7 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
     res.json({ sucess: true });
   } catch (error) {
     console.error("Error saving profile:", error);
-    res.status(500).json({ erro: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
