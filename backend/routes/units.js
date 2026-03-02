@@ -12,6 +12,16 @@ router.get("/", verifyFirebaseToken, async (req, res) => {
   res.json(rows);
 });
 
+// return units belonging to a specific course
+router.get("/by-course/:courseId", verifyFirebaseToken, async (req, res) => {
+  const { courseId } = req.params;
+  const [rows] = await db.query(
+    "SELECT name,id FROM units WHERE course_id = ?",
+    [courseId],
+  );
+  res.json(rows);
+});
+
 router.post("/", verifyFirebaseToken, async (req, res) => {
   const { name, code, courseId } = req.body;
 
