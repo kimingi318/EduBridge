@@ -30,6 +30,8 @@ type Department = {
 type Course = {
     id: string;
     name: string;
+    programme?: string;
+
 };
 type Props = PropsWithChildren<{
     isVisible: boolean;
@@ -96,8 +98,12 @@ export default function AddUnits({ isVisible, children, onClose }: Props) {
                     `${API_BASE_URL}/api/courses/by-department/${departmentValue}`
                 );
                 if (!res.ok) return;
-                const data = await res.json();
-                setCourses(data);
+                const data: Course[] = await res.json();
+                const labeled = data.map(c => ({
+            ...c,
+            label: c.programme ? `${c.programme} - ${c.name}` : c.name,
+          } as any));
+                setCourses(labeled as any);
             } catch (err) {
                 console.error(err);
             }
@@ -188,7 +194,7 @@ export default function AddUnits({ isVisible, children, onClose }: Props) {
                 <Dropdown
                     style={styles.dropdown}
                     data={courses}
-                    labelField="name"
+                    labelField="label"
                     valueField="id"
                     placeholder="Select Course"
                     value={courseValue}
