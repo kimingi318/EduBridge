@@ -39,6 +39,8 @@ export function RootLayout() {
 
   useEffect(() => {
     if (typeof isAuthenticating === "undefined") return;
+    const publicRoutes = ["LandingPage", "SignIn", "SignUp"];
+    const isPublicRoute = publicRoutes.includes(segments[0]);
     const inApp = segments[0] === "(admin)" || segments[0] === "(lecturer)" || segments[0] === "(student)";
     if (isAuthenticating) {
       if (!user) return;
@@ -51,17 +53,16 @@ export function RootLayout() {
           case 'Lecturer':
             router.replace('/(lecturer)/(tabs)/HomeScreen');
             return;
-
           case 'Student':
             router.replace('/(student)/(tabs)/HomeScreen');
         }
       }
     }
-    else if (!isAuthenticating) {
-      if (user === null) {
-        router.replace("/SignUp");
-      }
-      if (!inApp) {
+    else if (!isAuthenticating || user === null) {
+      // if (user === null) {
+      //   router.replace("/SignUp");
+      // }
+      if (!isPublicRoute) {
         router.replace("/SignIn")
       }
     }
@@ -83,6 +84,7 @@ export default function RootNavigator() {
               <>
                 <StatusBar style={isDark=== 'dark'? 'light': 'dark'}
                 backgroundColor={isDark === "dark" ? "#000000" : "#ffffff"}
+                translucent ={false}
                  animated/>
                 <RootLayout />
               </>
