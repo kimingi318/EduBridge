@@ -1,3 +1,4 @@
+import AddClassSchedule from '@/components/AddClassSchedule';
 import AddCourses from '@/components/AddCourses';
 import AddDepartment from '@/components/AddDepartment';
 import AddUnits from '@/components/AddUnits';
@@ -19,6 +20,7 @@ const HomeScreen = () => {
   const [isCourseModalVisible, setIsCourseModalVisible] = useState<boolean>(false);
   const [isDepartmentModalVisible, setIsDepartmentModalVisible] = useState<boolean>(false);
   const [isUnitModalVisible, setIsUnitModalVisible] = useState<boolean>(false);
+  const [isClassScheduleModalVisible, setIsClassScheduleModalVisible] = useState<boolean>(false);
 
   const handleAddCourseModal = () => {
     setIsCourseModalVisible(true);
@@ -28,6 +30,9 @@ const HomeScreen = () => {
   }
   const handleAddUnitModal = () => {
     setIsUnitModalVisible(true);
+  }
+  const handleAddClassScheduleModal = () => {
+    setIsClassScheduleModalVisible(true);
   }
   const { data: departmentStats, isLoading } = useQuery({
     queryKey: ["departmentStats"],
@@ -102,8 +107,8 @@ const HomeScreen = () => {
               />
               <ActionCard
                 name="users"
-                Title="Verify Lecturer"
-                action={handleAddCourseModal}
+                Title="Add Class Schedule"
+                action={handleAddClassScheduleModal}
               />
             </View>
 
@@ -119,6 +124,10 @@ const HomeScreen = () => {
               isVisible={isUnitModalVisible}
               onClose={() => setIsUnitModalVisible(false)}>
             </AddUnits>
+            <AddClassSchedule
+              isVisible={isClassScheduleModalVisible}
+              onClose={() => setIsClassScheduleModalVisible(false)}>
+            </AddClassSchedule>
             <Text style={styles.header} className='text-black font-inter-semibold'>Alert & Approvals</Text>
             <View>
               <AlertCard
