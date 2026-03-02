@@ -65,11 +65,8 @@ export default function ProfileScreen() {
             >
               {profile?.name || ""}
             </Text>
-            <Text className="text-slate-200 text-xs mt-1">
-              {profile?.course_name || ""}
-            </Text>
             <Text className="text-slate-300 text-xs">
-              {""}· {profile?.level || ""}
+              {"Lecturer"}· {profile?.department_name || ""}
             </Text>
           </View>
 
