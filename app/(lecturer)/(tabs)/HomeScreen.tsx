@@ -1,14 +1,12 @@
-import NextClassCard from '@/components/NextClassCard';
-import PaginationDots from '@/components/PaginationDots';
+import ClassCarousel from '@/components/ClassCarousel';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import SearchBar from '@/components/searchBar';
 import { useAuth } from '@/context/authContext';
+import { API_BASE_URL, apiFetch } from "@/utils/api";
+import { getTimeRemaining } from '@/utils/time';
 import { MaterialIcons } from "@expo/vector-icons";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  FlatList,
   ImageBackground,
   ScrollView,
   Text,
@@ -16,52 +14,59 @@ import {
   View
 } from "react-native";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
-const { width } = Dimensions.get("window");
 
-const classes = [
-  {
-    id: "1",
-    time: "10:00 AM – 1:00 PM",
-    title: "Cryptography & Computer Security",
-    room: "BSR 303",
-    level: "Level IV",
-    isNext: true,
-  },
-  {
-    id: "2",
-    time: "2:00 PM – 4:00 PM",
-    title: "Network Management",
-    room: "LAB 2",
-    level: "Level IV",
-    isNext: false,
-    
-  },
-  {
-    id: "3",
-    time: "4:00 PM – 6:00 PM",
-    title: "Data Structures",
-    room: "Room 12",
-    level: "Level II",
-    isNext: false,
-
-  },
-];
+// placeholder while sessions load
+const classesPlaceholder: any[] = [];
 const HomeScreen = () => {
   const { profile } = useAuth();
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const flatListRef = useRef<FlatList>(null);
-  const nextIndex = classes.findIndex((item) => item.isNext);
+  const [classes, setClasses] = useState<any[]>(classesPlaceholder);
+
+  function getTodayName() {
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    return days[new Date().getDay()];
+  }
 
   useEffect(() => {
-    if (nextIndex !== -1) {
-      setTimeout(() => {
-        flatListRef.current?.scrollToIndex({
-          index: nextIndex,
-          animated: true,
-        });
-      }, 500);
+    if (profile?.id) {
+      (async () => {
+        try {
+          const res = await apiFetch(`${API_BASE_URL}/api/sessions/by-lecturer/${profile.id}`,{
+            method: 'GET'
+          });
+          if (res.ok) {
+            const data = await res.json();
+            // optionally filter today's sessions
+            const todayName = getTodayName();
+            const todayData = data
+              .filter((s: any) => s.day_of_week === todayName)
+              .sort((a: any, b: any) => a.start_time.localeCompare(b.start_time));
+            // convert to card-friendly shape
+            const mapped = todayData.map((s: any) => ({
+              id: s.id,
+              courseTitle: s.unit_name || '',
+              timePeriod: `${s.start_time} – ${s.end_time}`,
+              lecturerName: s.lecturer_name || '',
+              classLocation: s.venue || '',
+              isOnline: false,
+              status: s.status || 'NEXT',
+              startsIn: getTimeRemaining(s.start_time),
+            }));
+            setClasses(mapped);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      })();
     }
-  }, []);
+  }, [profile]);
 
 
   return (
@@ -83,7 +88,7 @@ const HomeScreen = () => {
                     Good morning,{profile?.username || 'Lecturer'}
                   </Text>
                   <Text className="text-blue-200">
-                    {profile?.department_name ? `Admin  · ${profile.department_name}` : 'Edit you profile'}
+                    {profile?.department_name ? `Lecturer  · ${profile.department_name}` : 'Edit you profile'}
                   </Text>
                 </View>
               </View>
@@ -115,44 +120,7 @@ const HomeScreen = () => {
             {/* ================= TODAY'S CLASS ================= */}
             <SectionHeader title="Today’s Classes" right="TimeTable" />
             <View className="mt-4">
-              <Animated.FlatList
-                ref={flatListRef}
-                data={classes}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(item) => item.id}
-                onScroll={Animated.event(
-                  [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                  { useNativeDriver: false }
-                )}
-                renderItem={({ item, index }) => {
-                  const inputRange = [
-                    (index - 1) * width,
-                    index * width,
-                    (index + 1) * width,
-                  ];
-
-                  const scale = scrollX.interpolate({
-                    inputRange,
-                    outputRange: [0.9, 1, 0.9],
-                    extrapolate: "clamp",
-                  });
-
-                  return (
-                    <Animated.View
-                      style={{
-                        width,
-                        transform: [{ scale }],
-                      }}
-                    >
-                      <NextClassCard {...item} />
-                    </Animated.View>
-                  );
-                }}
-              />
-
-              <PaginationDots scrollX={scrollX} length={classes.length} />
+              <ClassCarousel sessions={classes} role="lecturer" />
             </View>
             {/* ================= ANNOUNCEMENTS ================= */}
             <SectionHeader title="Announcements" right="See all" />
