@@ -2,9 +2,11 @@ import ClassCarousel from '@/components/ClassCarousel';
 import ProfileAvatar from '@/components/ProfileAvatar';
 import SearchBar from '@/components/searchBar';
 import { useAuth } from '@/context/authContext';
+import { db } from "@/firebaseConfig";
 import { API_BASE_URL, apiFetch } from "@/utils/api";
 import { getTimeRemaining } from '@/utils/time';
 import { MaterialIcons } from "@expo/vector-icons";
+import { doc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
   ImageBackground,
@@ -22,42 +24,64 @@ const HomeScreen = () => {
   const [classes, setClasses] = useState<any[]>(classesPlaceholder);
 
   function getTodayName() {
-    const days = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    return days[new Date().getDay()];
+    return new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+    });
   }
+
+
+  function etaMinutes(startTime: string): string {
+    const [h, m] = startTime.split(":").map(Number);
+    const now = new Date();
+    const then = new Date(now);
+    then.setHours(h, m, 0, 0);
+    const diff = Math.max(0, Math.floor((then.getTime() - now.getTime()) / 60000));
+    return diff.toString();
+  }
+
+
+  const updateStatus = async (session: any,status: string) => {
+    await setDoc(
+      doc(db, "Class_Status", session.id),   
+      {
+        sessionId: session.id,
+        status,
+        updatedAt: new Date(),
+        courseId: session.course_id || session.courseId,
+        unitId: session.unit_id || session.unitId,
+        lecturerId: session.lecturer_id || session.lecturerId,
+        eta_min: etaMinutes(session.start_time),   
+      },
+      { merge: true }
+    );
+  };
+
 
   useEffect(() => {
     if (profile?.id) {
       (async () => {
         try {
-          const res = await apiFetch(`${API_BASE_URL}/api/sessions/by-lecturer/${profile.id}`,{
+          const res = await apiFetch(`${API_BASE_URL}/api/sessions/by-lecturer/${profile.id}`, {
             method: 'GET'
           });
           if (res.ok) {
             const data = await res.json();
-            // optionally filter today's sessions
             const todayName = getTodayName();
             const todayData = data
               .filter((s: any) => s.day_of_week === todayName)
               .sort((a: any, b: any) => a.start_time.localeCompare(b.start_time));
-            // convert to card-friendly shape
             const mapped = todayData.map((s: any) => ({
               id: s.id,
               courseTitle: s.unit_name || '',
               timePeriod: `${s.start_time} – ${s.end_time}`,
               lecturerName: s.lecturer_name || '',
               classLocation: s.venue || '',
-              isOnline: false,
-              status: s.status || 'NEXT',
-              startsIn: getTimeRemaining(s.start_time),
+              status: s.status,
+              startsIn: getTimeRemaining(s.start_time,s.end_time),
+              onPresent: () => updateStatus(s, "ONGOING"),
+              onCancel: () => updateStatus(s, "CANCELLED"),
+              onLate: () => updateStatus(s, "LATE"),
+              onJoinOnline: () => updateStatus(s, "ONLINE"),
             }));
             setClasses(mapped);
           }
@@ -98,51 +122,53 @@ const HomeScreen = () => {
 
           <View className='bg-gray-100 -mt-6 rounded-t-[30px] px-2 pt-3'>
             {/* ================= QUICK ACTIONS ================= */}
-              <View className="flex-row justify-between w-full">
-                <QuickCard
-                  title="Create Announcement"
-                  icon="campaign"
-                />
-                <QuickCard
-                  title="Upload Notes"
-                  icon="description"
-                />
-                <QuickCard
-                  title="Upload Notes"
-                  icon="description"
-                />
-                <QuickCard
-                  title="Create Online Class"
-                  icon="videocam"
-                />
-              </View>
+            <View className="flex-row justify-between w-full">
+              <QuickCard
+                title="Create Announcement"
+                icon="campaign"
+              />
+              <QuickCard
+                title="Upload Notes"
+                icon="description"
+              />
+              <QuickCard
+                title="Upload Notes"
+                icon="description"
+              />
+              <QuickCard
+                title="Create Online Class"
+                icon="videocam"
+              />
+            </View>
 
             {/* ================= TODAY'S CLASS ================= */}
             <SectionHeader title="Today’s Classes" right="TimeTable" />
-            <View className="mt-4">
-              <ClassCarousel sessions={classes} role="lecturer" />
+            <View className="mt-2">{classes.length > 0 ? (
+              <ClassCarousel sessions={classes} role="lecturer" />) : (
+              <Text className="text-gray-500 mt-2">No classes Today</Text>
+            )}
             </View>
             {/* ================= ANNOUNCEMENTS ================= */}
             <SectionHeader title="Announcements" right="See all" />
 
-              <AnnouncementCard
-                title="Exam result Submission"
-                subtitle="Due by Friday, 20 February"
-                icon="error-outline"
-                color="bg-red-500"
-              />
-              <AnnouncementCard
-                title="Lecturers Meeting"
-                subtitle="Reminder · Tomorrow 10:00 AM"
-                icon="notifications"
-                color="bg-blue-600"
-              />
-              <AnnouncementCard
-                title="Sit-in at Cosc 468"
-                subtitle="Wednesday 7:00 AM"
-                icon="event"
-                color="bg-indigo-600"
-              />
+            <AnnouncementCard
+              title="Exam result Submission"
+              subtitle="Due by Friday, 20 February"
+              icon="error-outline"
+              color="bg-red-500"
+            />
+            <AnnouncementCard
+              title="Lecturers Meeting"
+              subtitle="Reminder · Tomorrow 10:00 AM"
+              icon="notifications"
+              color="bg-blue-600"
+            />
+            <AnnouncementCard
+              title="Sit-in at Cosc 468"
+              subtitle="Wednesday 7:00 AM"
+              icon="event"
+              color="bg-indigo-600"
+            />
           </View>
         </ScrollView>
       </ImageBackground>

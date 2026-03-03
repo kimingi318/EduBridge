@@ -46,26 +46,26 @@ export default function HomeScreen() {
     fetchSchedule();
   }, [profile]);
 
-// Get today's day name (Monday, Tuesday...)
-function getTodayName() {
-  const days = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  return days[new Date().getDay()];
-}
+  // Get today's day name (Monday, Tuesday...)
+  function getTodayName() {
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    return days[new Date().getDay()];
+  }
 
-// Filter & sort today's sessions
-const todayName = getTodayName();
+  // Filter & sort today's sessions
+  const todayName = getTodayName();
 
-const todaysSessions = sessions
-  .filter((s) => s.day_of_week === todayName)
-  .sort((a, b) => a.start_time.localeCompare(b.start_time));
+  const todaysSessions = sessions
+    .filter((s) => s.day_of_week === todayName)
+    .sort((a, b) => a.start_time.localeCompare(b.start_time));
 
 
 
@@ -76,8 +76,7 @@ const todaysSessions = sessions
           {/* HEADER */}
           <View
             style={{ marginTop: hp(6) }}
-            className="px-5 flex-1 items-center pb-8 "
-          >
+            className="px-5 flex-1 items-center pb-8 ">
             <View className="flex-row items-center justify-between">
               <View style={{ paddingHorizontal: wp(2) }}
                 className="flex-row items-center ">
@@ -86,7 +85,6 @@ const todaysSessions = sessions
                   fallbackImage={require("../../../assets/images/student-dp.jpeg")}
                   dotColor="#22C55E"   // green
                 />
-
                 <View>
                   <Text style={{ fontSize: hp(1.5) }} className="text-white   font-inter-bold">
                     Good morning, {profile?.username || 'Student'}
@@ -101,11 +99,12 @@ const todaysSessions = sessions
             {/* SEARCH */}
             <SearchBar />
           </View>
+          
           {/* CONTENT */}
-          <View className="bg-gray-100 -mt-6 rounded-t-[30px] px-5 pt-6">
+          <View className="bg-gray-100 -mt-6 rounded-t-[30px] px-2 pt-3">
             {/* TODAY'S SCHEDULE */}
             <Text className="text-titles font-bold">Todays Schedule</Text>
-                        <View>
+            <View>
               {todaysSessions.length > 0 ? (
                 <ClassCarousel
                   sessions={todaysSessions.map((s) => ({
@@ -116,7 +115,7 @@ const todaysSessions = sessions
                     classLocation: s.venue || '',
                     isOnline: false,
                     status: s.status || 'NEXT',
-                    startsIn: getTimeRemaining(s.start_time),
+                    startsIn: getTimeRemaining(s.start_time,s.end_time),
                   }))}
                   role="student"
                 />
