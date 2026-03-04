@@ -1,5 +1,9 @@
 // helper for calculating time remaining until a given HH:MM:SS string
-export function getTimeRemaining(start_time: string, end_time: string): string {
+export function getTimeRemaining(
+  start_time: string,
+  end_time: string,
+  eta_min: number = 0,
+): string {
   if (!start_time) return "";
   const now = new Date();
   const [startH, startM, startS] = start_time.split(":").map(Number);
@@ -10,7 +14,7 @@ export function getTimeRemaining(start_time: string, end_time: string): string {
     now.getMonth(),
     now.getDate(),
     startH,
-    startM,
+    startM + eta_min,
     startS || 0,
   );
   const end = new Date(
@@ -33,5 +37,5 @@ export function getTimeRemaining(start_time: string, end_time: string): string {
   const hrs = Math.floor(diffMinutes / 60);
   const mins = diffMinutes % 60;
 
-  return hrs > 0 ? `${hrs}h ${mins}m` : `${mins} mins`;
+  return hrs > 0 ? `Starts in ${hrs}h ${mins}m` : `Starts in ${mins} mins`;
 }
