@@ -1,19 +1,24 @@
-import { Ionicons } from '@expo/vector-icons'
-import { TextInput, View } from 'react-native'
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen'
+import { darkTheme, lightTheme } from "@/utils/colors";
+import { Ionicons } from '@expo/vector-icons';
+import { TextInput, View, useColorScheme } from 'react-native';
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 
 const SearchBar = () => {
+    const scheme = useColorScheme();
+    const theme = scheme === "dark" ? darkTheme : lightTheme; 
   return (
-     <View className="mt-6 bg-white rounded-full flex-row items-center px-4 py-3"
-     style={{height: hp(6), width: wp(100)}}>
-              <Ionicons name="search" size={20} color="#6B7280" />
+
+     <View  className="mt-6 rounded-full flex-row items-center px-4"
+     style={{height: hp(6), width: wp(100),backgroundColor: theme.card}}>
+              <Ionicons name="search" size={20} color={theme.text} />
               <TextInput
                 placeholder="Search classes, lecturers, rooms..."
-                className="flex-1 ml-2 text-gray-700"
-                style={{fontSize: hp(1)}}
+                placeholderTextColor={theme.subText}
+                className="flex-1 ml-2 "
+                style={{fontSize: hp(2),color: theme.text}}
                 onChangeText={()=>{}}
               />
-              <Ionicons name="mic-outline" size={20} color="#6B7280" />
+              <Ionicons name="mic-outline" size={20} color={theme.text} />
     </View>
 
   )
