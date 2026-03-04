@@ -12,7 +12,8 @@ import {
   ImageBackground,
   ScrollView,
   Text,
-  View
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { blurhash } from "../../../utils/common";
@@ -21,7 +22,37 @@ import { blurhash } from "../../../utils/common";
 export default function HomeScreen() {
   const router = useRouter();
   const { profile } = useAuth();
-  const [sessions, setSessions] = useState<any[]>([]); // raw sessions from backend
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!sessions.length) {
+      setClasses([]);
+      return;
+    }
+
+    const todayName = new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+
+    const todayData = sessions
+      .filter((s) => s.day_of_week === todayName)
+      .sort((a, b) => a.start_time.localeCompare(b.start_time));
+
+    const mapped = todayData.map((s) => ({
+      id: s.id,
+      courseTitle: s.unit_name || '',
+      timePeriod: `${s.start_time} – ${s.end_time}`,
+      lecturerName: s.lecturer_name || '',
+      classLocation: s.venue || '',
+      status: s.status,
+      meet_link: s.meet_link || null,
+      startsIn: getTimeRemaining(s.start_time, s.end_time),
+    }));
+
+    setClasses(mapped);
+  }, [sessions]);
+
 
   useEffect(() => {
     if (!profile) return;
@@ -45,27 +76,6 @@ export default function HomeScreen() {
     };
     fetchSchedule();
   }, [profile]);
-
-  // Get today's day name (Monday, Tuesday...)
-  function getTodayName() {
-    const days = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    return days[new Date().getDay()];
-  }
-
-  // Filter & sort today's sessions
-  const todayName = getTodayName();
-
-  const todaysSessions = sessions
-    .filter((s) => s.day_of_week === todayName)
-    .sort((a, b) => a.start_time.localeCompare(b.start_time));
 
 
 
@@ -99,42 +109,35 @@ export default function HomeScreen() {
             {/* SEARCH */}
             <SearchBar />
           </View>
-          
+
           {/* CONTENT */}
           <View className="bg-gray-100 -mt-6 rounded-t-[30px] px-2 pt-3">
             {/* TODAY'S SCHEDULE */}
-            <Text className="text-titles font-bold">Todays Schedule</Text>
+            <SectionHeader title="Today’s Classes" right="TimeTable" />
             <View>
-              {todaysSessions.length > 0 ? (
-                <ClassCarousel
-                  sessions={todaysSessions.map((s) => ({
-                    id: s.id,
-                    courseTitle: s.unit_name || '',
-                    timePeriod: `${s.start_time} – ${s.end_time}`,
-                    lecturerName: s.lecturer_name || '',
-                    classLocation: s.venue || '',
-                    isOnline: false,
-                    status: s.status || 'NEXT',
-                    startsIn: getTimeRemaining(s.start_time,s.end_time),
-                  }))}
-                  role="student"
-                />
+              {classes.length > 0 ? (
+                <ClassCarousel sessions={classes} role="student" />
               ) : (
                 <Text className="text-gray-500 mt-2">No schedule Today</Text>
               )}
             </View>
 
             {/* EVENTS */}
-            <View className="mt-4">
-              <View className="flex-row justify-between items-center mb-3">
-                <Text className="text-titles font-bold">Events</Text>
+            <SectionHeader
+              title="Events"
+              right={<Text className="text-edublue font-semibold" onPress={() => router.push("/NotificationScreen")}>
+                See all</Text>} />
+            <View>
+              <View className="flex-row justify-center gap-2 items-center mb-3">
                 <Text className="bg-edublue text-white px-4 py-1 rounded-full text-xs">
                   Academic
                 </Text>
                 <Text className="bg-edulightblue text-edublue px-4 py-1 rounded-full text-xs">
                   Social
                 </Text>
-                <Text className="text-edublue font-semibold" onPress={() => router.push("/NotificationScreen")}>See all</Text>
+                <Text className="bg-edulightblue text-edublue px-4 py-1 rounded-full text-xs">
+                  Memos
+                </Text>
               </View>
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -173,12 +176,11 @@ export default function HomeScreen() {
             </View>
 
             {/* MEMOS */}
-            <View className="mt-4 mb-10">
-              <View className="flex-row justify-between mb-3">
-                <Text className="text-titles font-bold">Memos</Text>
-                <Text className="text-edublue font-semibold" onPress={() => router.push("/NotificationScreen")}>See all</Text>
-              </View>
-
+            <SectionHeader
+              title="Annoucements"
+              right={<Text className="text-edublue font-semibold"
+                onPress={() => router.push("/NotificationScreen")}>See all</Text>} />
+            <View className=" mb-10">
               <Memo
                 color="red"
                 title="CUSA Elections Nominee Registration"
@@ -233,4 +235,12 @@ function Memo({
     </View>
   );
 }
+const SectionHeader = ({ title, right }: any) => (
+  <View className="flex-row justify-between items-center mt-4 mb-4">
+    <Text className="text-lg font-bold">{title}</Text>
+    <TouchableOpacity>
+      <Text className="text-blue-600">{right} ›</Text>
+    </TouchableOpacity>
+  </View>
+);
 
