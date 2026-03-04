@@ -15,6 +15,7 @@ const SharedTabLayout: React.FC = () => {
   const activeTint = isDark ? '#fff' : '#000';
   const inactiveTint = isDark ? '#fff' : '#000';
 
+
   return (
     <>
       <Tabs
