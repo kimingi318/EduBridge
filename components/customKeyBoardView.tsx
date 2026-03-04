@@ -12,9 +12,9 @@ const CustomKeyBoardView: React.FC<customKeyBoardViewProps> = ({ children }) => 
             className='flex-1'
         >
             <ScrollView
-            className='flex-1'
-             bounces={false} 
-             showsVerticalScrollIndicator={false}>
+                className='flex-1'
+                bounces={false}
+                showsVerticalScrollIndicator={false}>
                 {children}
             </ScrollView>
         </KeyboardAvoidingView>
