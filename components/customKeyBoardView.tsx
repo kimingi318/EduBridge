@@ -1,5 +1,5 @@
 import React from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 
 const ios = Platform.OS === 'ios';
 interface customKeyBoardViewProps {
@@ -9,11 +9,13 @@ const CustomKeyBoardView: React.FC<customKeyBoardViewProps> = ({ children }) => 
     return (
         <KeyboardAvoidingView
             behavior={ios ? 'padding' : 'height'}
-            className='flex-1'
+            style={styles.container}
+            keyboardVerticalOffset={ios ? 60 : 25}
         >
             <ScrollView
                 className='flex-1'
-                bounces={false}
+                contentContainerStyle={styles.scroll}
+                keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}>
                 {children}
             </ScrollView>
@@ -24,3 +26,7 @@ const CustomKeyBoardView: React.FC<customKeyBoardViewProps> = ({ children }) => 
 
 export default CustomKeyBoardView
 
+const styles = StyleSheet.create({
+    scroll:{flexGrow:1},
+    container:{flex:1}
+})

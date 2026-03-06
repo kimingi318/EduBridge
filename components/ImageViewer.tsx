@@ -9,4 +9,10 @@ type Props = {
 
 export default function ImageViewer({ imgSource,selectedImage }: Props) {
     const imageSource = selectedImage ? { uri: selectedImage}: imgSource
-    return <Image source={imageSource} style={{ width: wp(24), height: hp(12),borderRadius:50,marginLeft:wp(2), marginVertical:hp(1)}}/>}
+    return <Image source={imageSource} style={{ 
+        width: wp(24), 
+        height: hp(12),
+        backgroundColor: "#fff",
+        borderRadius:50,
+        marginLeft:wp(2), 
+        marginVertical:hp(1)}}/>}

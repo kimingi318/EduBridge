@@ -1,11 +1,15 @@
+import { darkTheme, lightTheme } from "@/utils/colors";
 import { router } from "expo-router";
-import { Text, View } from "react-native";
+import { Text, View, useColorScheme } from "react-native";
 import { heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import EduLogo from "../components/EduLogo";
 import GradientButton from "../components/GradientButton";
 import "./globals.css";
 
 export default function LandingPage() {
+    const scheme = useColorScheme();
+    const theme = scheme === "dark" ? darkTheme : lightTheme;
+
   return (
     <View className="flex-1 h-full p-6">
             {/*Logo */}
@@ -16,11 +20,11 @@ export default function LandingPage() {
       </View>
       {/*Title */}
       <View className="items-center mt-10 mb-10">
-        <Text className="text-[32px] font-bold text-black">Welcome to</Text>
+        <Text style={{color:theme.text}} className="text-[32px] font-bold">Welcome to</Text>
         <Text className="text-[42px] font-black text-[#0C06B9] mt-1">
-          Edu<Text className="text-black">Bridge</Text>.
+          Edu<Text style={{color:theme.text}} >Bridge</Text>.
         </Text>
-        <Text className="text-sm text-gray-500 mt-2 mb-8">
+        <Text style={{color:theme.subText}} className="text-sm  mt-2 mb-8">
           Your Campus Companion
         </Text>
       </View>
@@ -41,7 +45,7 @@ export default function LandingPage() {
         />
       </View>
       {/* CTA */}
-      <View className="items-center" style={{marginTop: hp(10)}}>
+      <View className="items-center" style={{marginTop: hp(8)}}>
        <GradientButton
        title="Get Started"
        onPress={() => {
@@ -61,10 +65,13 @@ function FeatureItem({
   title: string;
   description: string;
 }) {
+    const scheme = useColorScheme();
+  const theme = scheme === "dark" ? darkTheme : lightTheme;
+
   return (
     <View className="flex-row items-start mb-4">
-      <Text className="text-blue-700 text-base mr-3 mt-0.5">✓</Text>
-      <Text className="flex-1 text-sm text-gray-700">
+      <Text style={{color:theme.text}} className=" text-base mr-3 mt-0.5">✓</Text>
+      <Text style={{color:theme.subText}} className="flex-1 text-sm text-gray-700">
         <Text className="font-bold text-blue-700">{title}. </Text>
         {description}
       </Text>

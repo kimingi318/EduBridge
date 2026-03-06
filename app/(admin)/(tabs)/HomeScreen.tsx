@@ -6,6 +6,7 @@ import ProfileAvatar from '@/components/ProfileAvatar';
 import SearchBar from '@/components/searchBar';
 import { useAuth } from '@/context/authContext';
 import { getDepartmentStats } from "@/utils/api";
+import { darkTheme, lightTheme } from "@/utils/colors";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -13,14 +14,21 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useQuery } from "@tanstack/react-query";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
+
+
+
 const HomeScreen = () => {
   const { profile } = useAuth();
   const [isCourseModalVisible, setIsCourseModalVisible] = useState<boolean>(false);
   const [isDepartmentModalVisible, setIsDepartmentModalVisible] = useState<boolean>(false);
   const [isUnitModalVisible, setIsUnitModalVisible] = useState<boolean>(false);
   const [isClassScheduleModalVisible, setIsClassScheduleModalVisible] = useState<boolean>(false);
+  const scheme = useColorScheme();
+  const theme = scheme === "dark" ? darkTheme : lightTheme;
+  const styles = createStyles(theme)
+
 
   const handleAddCourseModal = () => {
     setIsCourseModalVisible(true);
@@ -64,23 +72,23 @@ const HomeScreen = () => {
             <SearchBar />
           </View>
 
-          <View className='bg-gray-100 -mt-6 rounded-t-[30px] px-2 pt-3'>
-            <Text style={styles.header} className='text-black font-inter-semibold'>Department Overview</Text>
+          <View style={{backgroundColor:theme.background}} className=' -mt-6 rounded-t-[30px] px-2 pt-3'>
+            <Text style={styles.header} className='font-inter-semibold'>Department Overview</Text>
             <View style={styles.container} className=' flex-row gap-1 w-full '>
               <Departmentcard
                 title="Total Student"
                 name="users"
-                number={isLoading ? "..." :String(departmentStats?.students || 0)}
+                number={isLoading ? "..." : String(departmentStats?.students || 0)}
               />
               <Departmentcard
                 title="Total Lecturer"
                 name="mortar-board"
-                number={isLoading ? "..." :String(departmentStats?.lecturers || 0)}
+                number={isLoading ? "..." : String(departmentStats?.lecturers || 0)}
               />
               <Departmentcard
                 title="Total Courses"
                 name="users"
-                number={isLoading ? "..." :String(departmentStats?.courses || 0)}
+                number={isLoading ? "..." : String(departmentStats?.courses || 0)}
               />
               <Departmentcard
                 title="Requests"
@@ -177,15 +185,18 @@ const HomeScreen = () => {
 
 export default HomeScreen
 
-const styles = StyleSheet.create({
+const createStyles =(theme:any)=>
+   StyleSheet.create({
   container: {
     height: hp(10),
     marginBottom: hp(1),
-    paddingHorizontal: wp(1)
+    paddingHorizontal: wp(1),
+    backgroundColor: theme.background
   },
   header: {
     fontSize: hp(1.5),
-    marginBottom: hp(1)
+    marginBottom: hp(1),
+    color: theme.text
   }
 })
 
@@ -198,13 +209,17 @@ function Departmentcard({
   name: React.ComponentProps<typeof FontAwesome>['name'];
   number: string;
 }) {
+  const scheme = useColorScheme();
+  const theme = scheme === "dark" ? darkTheme : lightTheme;
+
   return (
-    <View style={{ height: hp(10), width: wp(23), paddingHorizontal: wp(1) }} className='bg-white rounded-[20px] flex-1 items-center justify-center'>
-      <View className='flex-row gap-1'>
-        <FontAwesome name={name} size={24} color="black" />
-        <Text >{number}</Text>
+    <View style={{ height: hp(10), width: wp(23), paddingHorizontal: wp(1),backgroundColor:theme.card }} 
+    className=' rounded-[20px] flex-1 items-center justify-center'>
+      <View className='flex-row gap-2'>
+        <FontAwesome name={name} size={24} color={theme.subText} />
+        <Text style={{color:theme.text}}>{number}</Text>
       </View>
-      <Text style={{ fontSize: hp(1.5) }}>{title}</Text>
+      <Text style={{ fontSize: hp(1.5),color:theme.subText }}>{title}</Text>
     </View>
   );
 }
@@ -218,6 +233,8 @@ function ActionCard({
   Title: string;
   action: any;
 }) {
+
+
   return (
     <TouchableOpacity onPress={action}>
       <LinearGradient
@@ -255,21 +272,24 @@ function AlertCard({
   action: any;
   number: string;
 }) {
+  const scheme = useColorScheme();
+  const theme = scheme === "dark" ? darkTheme : lightTheme;
+
   return (
     <TouchableOpacity onPress={action}>
-      <View style={{ height: hp(7), padding: hp(1), marginBottom: hp(1) }} className=' bg-white flex-row  rounded-[20px] items-center'>
-        <View className='rounded-lg bg-edulightblue p-1.5'>
-          <AntDesign name="alert" size={24} color="red" />
+      <View style={{ height: hp(7), padding: hp(1), marginBottom: hp(1) ,backgroundColor:theme.card}} className='  flex-row  rounded-[20px] items-center'>
+        <View style={{backgroundColor:theme.surface}} className='rounded-lg p-1.5'>
+          <AntDesign name="alert" size={24} color={theme.subText} />
         </View>
 
         <View style={{ marginLeft: hp(2) }} className='flex-1'>
-          <Text style={{ fontSize: hp(2) }} className='font-inter-medium'>{type}</Text>
-          <Text style={{ fontSize: hp(1.5) }} className='font-inter-light'>{Title}</Text>
+          <Text style={{ fontSize: hp(2),color:theme.text}} className='font-inter-medium'>{type}</Text>
+          <Text style={{ fontSize: hp(1.5),color:theme.subText }} className='font-inter-light'>{Title}</Text>
         </View>
         <View style={{ width: wp(5), height: hp(3) }} className='rounded-full p-1 bg-[#ff0000]'>
           <Text className='text-white font-inter-bold'>{number}</Text>
         </View>
-        <Entypo name="chevron-right" size={24} color="black" />
+        <Entypo name="chevron-right" size={24} color={theme.text} />
       </View>
     </TouchableOpacity>
   );
@@ -283,14 +303,16 @@ function ActivityCard({
   // type: string;
   action: any;
 }) {
+    const scheme = useColorScheme();
+  const theme = scheme === "dark" ? darkTheme : lightTheme;
   return (
     <TouchableOpacity onPress={action}>
-      <View style={{ height: hp(7), padding: hp(1), marginBottom: hp(1) }} className=' bg-white flex-row  rounded-[20px] items-center'>
-        <View className='rounded-lg bg-edulightblue p-1.5'>
+      <View style={{ height: hp(7), padding: hp(1), marginBottom: hp(1),backgroundColor:theme.card }} className='  flex-row  rounded-[20px] items-center'>
+        <View style={{backgroundColor:theme.surface}} className='rounded-lg  p-1.5'>
           <MaterialIcons name="admin-panel-settings" size={24} color="blue" />
         </View>
         {/* <Text style={{ fontSize: hp(2) }} className='font-inter-medium'>{type}</Text> */}
-        <Text style={{ fontSize: hp(1.5), marginLeft: hp(2) }} className='font-inter-light'>{Title}</Text>
+        <Text style={{ fontSize: hp(1.5), marginLeft: hp(2), color:theme.text }} className='font-inter-light'>{Title}</Text>
       </View>
     </TouchableOpacity>
   );

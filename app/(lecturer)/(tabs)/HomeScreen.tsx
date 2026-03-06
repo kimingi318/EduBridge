@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import { doc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
+  ImageBackground,
   Modal,
   ScrollView,
   Text,
@@ -121,9 +122,13 @@ const HomeScreen = () => {
 
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.background }}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {/* ================= HEADER ================= */}
+    <View style={{ flex: 1, }}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* ================= HEADER ================= */}
+        <ImageBackground
+           source={require("../../../assets/images/lecturer-signup-img.jpg")}
+           style={{ height: hp(30) }}
+           resizeMode='cover'>
           <View style={{ marginTop: hp(6) }} className='px-5 flex-1 items-center pb-8'>
             <View className="flex-row items-center justify-between">
               <View style={{ paddingHorizontal: wp(2) }} className='flex-row items-center'>
@@ -133,10 +138,10 @@ const HomeScreen = () => {
                   dotColor="#16a34a"
                 />
                 <View>
-                  <Text style={{color: theme.text}} className=" text-xl font-bold">
+                  <Text  className=" text-xl text-white font-bold">
                     Good morning,{profile?.username || 'Lecturer'}
                   </Text>
-                  <Text style={{color: theme.subText}}>
+                  <Text className="text-gray-200">
                     {profile?.department_name ? `Lecturer  · ${profile.department_name}` : 'Edit you profile'}
                   </Text>
                 </View>
@@ -144,129 +149,127 @@ const HomeScreen = () => {
             </View>
             <SearchBar />
           </View>
+        </ImageBackground>
 
-          <View className=' -mt-6 rounded-t-[30px] px-2 pt-3'>
-            {/* ================= QUICK ACTIONS ================= */}
-            <View className="flex-row justify-between w-full">
-              <QuickCard
-                title="Create Announcement"
-                icon="campaign"
-              />
-              <QuickCard
-                title="Upload Notes"
-                icon="description"
-              />
-              <QuickCard
-                title="Upload Notes"
-                icon="description"
-              />
-              <QuickCard
-                title="Create Online Class"
-                icon="videocam"
-              />
-            </View>
-
-            {/* ================= TODAY'S CLASS ================= */}
-            <SectionHeader
-              title="Today’s Classes" right="TimeTable" />
-            <View>{classes.length > 0 ? (
-              <ClassCarousel sessions={classes} role="lecturer" />) : (
-              <Text className="text-gray-500 mt-2">No classes Today</Text>
-            )}
-            </View>
-            {/* ================= ANNOUNCEMENTS ================= */}
-            <SectionHeader title="Announcements" right={<Text className="text-edublue font-semibold"
-              onPress={() => router.push("/NotificationScreen")}>See all</Text>} />
-
-            <AnnouncementCard
-              title="Exam result Submission"
-              subtitle="Due by Friday, 20 February"
-              icon="error-outline"
-              color={theme.surface}
+        <View style={{ backgroundColor: theme.background }} className=' -mt-6 rounded-t-[30px] px-2 pt-3'>
+          {/* ================= QUICK ACTIONS ================= */}
+          <View className="flex-row justify-between w-full">
+            <QuickCard
+              title="Create Announcement"
+              icon="campaign"
             />
-            <AnnouncementCard
-              title="Lecturers Meeting"
-              subtitle="Reminder · Tomorrow 10:00 AM"
-              icon="notifications"
-              color={theme.surface}
+            <QuickCard
+              title="Upload Notes"
+              icon="description"
             />
-            <AnnouncementCard
-              title="Sit-in at Cosc 468"
-              subtitle="Wednesday 7:00 AM"
-              icon="event"
-              color={theme.surface}
+            <QuickCard
+              title="Upload Notes"
+              icon="description"
+            />
+            <QuickCard
+              title="Create Online Class"
+              icon="videocam"
             />
           </View>
-        </ScrollView>
-        <Modal visible={lateModalVisible} transparent animationType="slide">
-          <View className="flex-1 bg-black/40 justify-end">
-            <View className="bg-white p-5 rounded-t-3xl">
-              <Text className="text-lg font-bold mb-4">How late will you be?</Text>
 
-              {[30, 60, 90, 120].map((min) => (
-                <TouchableOpacity
-                  key={min}
-                  className="py-3 border-b border-gray-200"
-                  onPress={() => {
-                    updateStatus(selectedSession, "LATE", min);
-                    setLateModalVisible(false);
-                  }}
-                >
-                  <Text className="text-base">
-                    {min === 30
-                      ? "30 minutes"
-                      : min === 60
-                        ? "1 hour"
-                        : min === 90
-                          ? "1 hr 30 min"
-                          : "2 hr"}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-
-              <TouchableOpacity
-                className="mt-4"
-                onPress={() => setLateModalVisible(false)}
-              >
-                <Text className="text-red-500 text-center">Cancel</Text>
-              </TouchableOpacity>
-            </View>
+          {/* ================= TODAY'S CLASS ================= */}
+          <SectionHeader
+            title="Today’s Classes" right="TimeTable" />
+          <View>{classes.length > 0 ? (
+            <ClassCarousel sessions={classes} role="lecturer" />) : (
+            <Text className="text-gray-500 mt-2">No classes Today</Text>
+          )}
           </View>
-        </Modal>
-        <Modal visible={onlineModalVisible} transparent animationType="slide">
-          <View className="flex-1 bg-black/40 justify-end">
-            <View className="bg-white p-5 rounded-t-3xl">
-              <Text className="text-lg font-bold mb-4">
-                Paste Google Meet or Zoom Link
-              </Text>
+          {/* ================= ANNOUNCEMENTS ================= */}
+          <SectionHeader title="Announcements" right={<Text style={{color:theme.text}} className="font-semibold"
+            onPress={() => router.push("/NotificationScreen")}>See all</Text>} />
 
-              <TextInput
-                value={meetLink}
-                onChangeText={setMeetLink}
-                placeholder="https://meet.google.com/..."
-                className="border p-3 rounded-xl mb-4"
-              />
+          <AnnouncementCard
+            title="Exam result Submission"
+            subtitle="Due by Friday, 20 February"
+            icon="error-outline"
+          />
+          <AnnouncementCard
+            title="Lecturers Meeting"
+            subtitle="Reminder · Tomorrow 10:00 AM"
+            icon="notifications"
+          />
+          <AnnouncementCard
+            title="Sit-in at Cosc 468"
+            subtitle="Wednesday 7:00 AM"
+            icon="event"
+          />
+        </View>
+      </ScrollView>
+      <Modal visible={lateModalVisible} transparent animationType="slide">
+        <View className="flex-1 bg-black/40 justify-end">
+          <View className="bg-white p-5 rounded-t-3xl">
+            <Text className="text-lg font-bold mb-4">How late will you be?</Text>
 
+            {[30, 60, 90, 120].map((min) => (
               <TouchableOpacity
-                className="bg-blue-600 py-3 rounded-xl"
+                key={min}
+                className="py-3 border-b border-gray-200"
                 onPress={() => {
-                  let formattedLink = meetLink.trim();
-
-                  if (!formattedLink.startsWith("http://") && !formattedLink.startsWith("https://")) {
-                    formattedLink = "https://" + formattedLink;
-                  }
-
-                  updateStatus(selectedSession, "ONLINE", 0, formattedLink); setOnlineModalVisible(false);
-                  setMeetLink("");
+                  updateStatus(selectedSession, "LATE", min);
+                  setLateModalVisible(false);
                 }}
               >
-                <Text style={{color:theme.text}}className=" text-center font-semibold">
-                  Start Online Class
+                <Text className="text-base">
+                  {min === 30
+                    ? "30 minutes"
+                    : min === 60
+                      ? "1 hour"
+                      : min === 90
+                        ? "1 hr 30 min"
+                        : "2 hr"}
                 </Text>
               </TouchableOpacity>
-            </View>
+            ))}
+
+            <TouchableOpacity
+              className="mt-4"
+              onPress={() => setLateModalVisible(false)}
+            >
+              <Text className="text-red-500 text-center">Cancel</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
+        </View>
+      </Modal>
+      <Modal visible={onlineModalVisible} transparent animationType="slide">
+        <View className="flex-1 bg-black/40 justify-end">
+          <View className="bg-white p-5 rounded-t-3xl">
+            <Text className="text-lg font-bold mb-4">
+              Paste Google Meet or Zoom Link
+            </Text>
+
+            <TextInput
+              value={meetLink}
+              onChangeText={setMeetLink}
+              placeholder="https://meet.google.com/..."
+              className="border p-3 rounded-xl mb-4"
+            />
+
+            <TouchableOpacity
+              className="bg-blue-600 py-3 rounded-xl"
+              onPress={() => {
+                let formattedLink = meetLink.trim();
+
+                if (!formattedLink.startsWith("http://") && !formattedLink.startsWith("https://")) {
+                  formattedLink = "https://" + formattedLink;
+                }
+
+                updateStatus(selectedSession, "ONLINE", 0, formattedLink); setOnlineModalVisible(false);
+                setMeetLink("");
+              }}
+            >
+              <Text style={{ color: theme.text }} className=" text-center font-semibold">
+                Start Online Class
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -274,46 +277,50 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 
-const QuickCard = ({ title, icon,color }: any) =>{ 
+const QuickCard = ({ title, icon, color }: any) => {
   const scheme = useColorScheme();
   const theme = scheme === "dark" ? darkTheme : lightTheme;
 
 
-  return(
-  <TouchableOpacity style={{backgroundColor: theme.card }} className="w-24 h-24 rounded-2xl justify-center items-center p-2">
-    <MaterialIcons name={icon} size={28} color={theme.text} />
-    <Text style={{color: theme.text}} className=" text-xs text-center mt-2">{title}</Text>
-  </TouchableOpacity>
-);};
+  return (
+    <TouchableOpacity style={{ backgroundColor: theme.card }} className="w-24 h-24 rounded-2xl justify-center items-center p-2">
+      <MaterialIcons name={icon} size={28} color={theme.text} />
+      <Text style={{ color: theme.text }} className=" text-xs text-center mt-2">{title}</Text>
+    </TouchableOpacity>
+  );
+};
 
 
 const SectionHeader = ({ title, right }: any) => {
   const scheme = useColorScheme();
   const theme = scheme === "dark" ? darkTheme : lightTheme;
 
-  return(
-  <View className="flex-row justify-between items-center mt-4 mb-4">
-    <Text className="text-lg font-bold">{title}</Text>
-    <TouchableOpacity>
-      <Text style={{color: theme.text, }}>{right}</Text>
-    </TouchableOpacity>
-  </View>
-);};
+  return (
+    <View className="flex-row justify-between items-center mt-4 mb-4">
+      <Text style={{ color: theme.text }} className="text-lg font-bold">{title}</Text>
+      <TouchableOpacity>
+        <Text style={{ color: theme.text, }}>{right}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const AnnouncementCard = ({
   title,
   subtitle,
   icon,
-  color,
-}: any) => (
-  <View className="bg-white p-4 rounded-2xl mb-2 shadow flex-row items-center">
-    <View className={`${color} p-3 rounded-xl mr-3`}>
-      <MaterialIcons name={icon} size={22} color="white" />
+}: any) => {
+  const scheme = useColorScheme();
+  const theme = scheme === "dark" ? darkTheme : lightTheme;
+  return(
+  <View style={{backgroundColor: theme.card}} className="p-4 rounded-2xl mb-2 shadow flex-row items-center">
+    <View style={{backgroundColor:theme.surface}} className= "p-3 rounded-xl mr-3">
+      <MaterialIcons name={icon} size={22} color={theme.text} />
     </View>
     <View>
-      <Text className="font-semibold">{title}</Text>
-      <Text className="text-gray-500 text-sm">{subtitle}</Text>
+      <Text style={{color:theme.text}} className="font-semibold">{title}</Text>
+      <Text style={{color:theme.subText}} className=" text-sm">{subtitle}</Text>
     </View>
   </View>
-);
+);};
 

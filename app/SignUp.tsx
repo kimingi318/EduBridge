@@ -1,6 +1,6 @@
-import { MenuItem } from "@/components/CustomeMenuItems";
 import GradientButton from "@/components/GradientButton";
 import icons from "@/constants/icons";
+import { darkTheme, lightTheme } from "@/utils/colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Link, router } from "expo-router";
 import { useState } from "react";
@@ -13,9 +13,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useColorScheme
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-import { Menu, MenuOptions, MenuTrigger } from "react-native-popup-menu";
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -25,10 +25,10 @@ import EduLogo from "../components/EduLogo";
 import Loading from "../components/loading";
 import { useAuth } from "../context/authContext";
 
-const data =[
-  {label: 'Student', value: 'Student'},
-  {label: 'Admin', value: 'Admin'},
-  {label: 'Lecturer', value: 'Lecturer'}
+const data = [
+  { label: 'Student', value: 'Student' },
+  { label: 'Admin', value: 'Admin' },
+  { label: 'Lecturer', value: 'Lecturer' }
 ]
 
 export default function SignUp() {
@@ -38,8 +38,13 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { signUp } = useAuth();
-   const [value, setValue] = useState(null);
-  
+  const [value, setValue] = useState(null);
+  const scheme = useColorScheme();
+  const theme = scheme === "dark" ? darkTheme : lightTheme;
+  const styles = createStyles(theme);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
 
   const handleSignup = async () => {
     if (!email || !role || !password || !confirmPassword) {
@@ -79,52 +84,16 @@ export default function SignUp() {
             </View>
             <Text className="text-blue-700 font-bold text-lg">EduBridge.</Text>
           </View>
-
-          <Menu>
-            <MenuTrigger
-              customStyles={{
-                triggerWrapper: {
-                  //trigger wrapper styles
-                },
-              }}
-            >
-              <Ionicons name="menu-outline" size={28} color="#000" />
-            </MenuTrigger>
-            <MenuOptions
-              customStyles={{
-                optionsContainer: {
-                  backgroundColor: "#07285E",
-                  borderRadius: 10,
-                  borderCurve: "continuous",
-                  marginTop: 30,
-                  marginLeft: -20,
-                  width: wp(25),
-                },
-              }}
-            >
-              <MenuItem
-                text="Lecturer"
-                action={() => router.push("/SignIn")}
-                value="Lecturer"
-              />
-              <Divider />
-              <MenuItem
-                text="Admin"
-                action={() => router.push("/SignIn")}
-                value="Admin"
-              />
-            </MenuOptions>
-          </Menu>
         </View>
       </ImageBackground>
 
       {/* White Card */}
-      <View className="flex-1 bg-white rounded-t-3xl -mt-10 px-6 pt-6">
-        <Text className="text-xl font-bold text-gray-900 mb-1">
+      <View style={{ backgroundColor: theme.background }} className="flex-1 rounded-t-3xl -mt-10 px-6 pt-6">
+        <Text style={{ color: theme.text }} className="text-xl font-bold  mb-1">
           Join EduBridge
         </Text>
 
-        <Text className="text-gray-500 mb-6">
+        <Text style={{ color: theme.subText }} className=" mb-6">
           or{" "}
           <Link href="/SignIn">
             <Text className="text-blue-600 font-semibold">Sign In</Text>
@@ -138,8 +107,11 @@ export default function SignUp() {
             <TextInput
               value={email}
               onChangeText={setEmail}
-              className="border-b border-gray-300 pb-2 text-gray-800"
+              className="border-b border-gray-300 pb-2 "
               placeholder="example@email.com"
+              style={{ color: theme.text }}
+              placeholderTextColor={theme.subText}
+
             />
           </View>
 
@@ -147,19 +119,22 @@ export default function SignUp() {
             <Text style={styles.header} className=" text-gray-500 mb-1">
               Role.*
             </Text>
-            <Dropdown 
-            style={styles.dropdown} 
-            data={data} 
-            labelField="label"  
-             placeholder="Select Role" 
-             value={value} 
-             valueField="value"
-             placeholderStyle={styles.placeholderStyle}
-             onChange={(item) => {
-                 setValue(item.value);
-                 setRole(item.value)
-             }}
-               />
+            <Dropdown
+              style={styles.dropdown}
+              data={data}
+              labelField="label"
+              placeholder="Select Role"
+              value={value}
+              valueField="value"
+              placeholderStyle={styles.placeholderStyle}
+              containerStyle={styles.dropdownContainer}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={styles.itemTextStyle}
+              onChange={(item) => {
+                setValue(item.value);
+                setRole(item.value)
+              }}
+            />
           </View>
 
           <View>
@@ -168,11 +143,30 @@ export default function SignUp() {
               <TextInput
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
-                className="flex-1 pb-2 text-gray-800"
+                style={{ color: theme.text }}
+                className="flex-1 pb-2 "
                 placeholder="********"
+                placeholderTextColor={theme.subText}
               />
-              <Ionicons name="eye-outline" size={18} color="#6B7280" />
+              <View className="flex-row items-center ">
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  style={{ color: theme.text }}
+                  className="flex-1 pb-2"
+                  placeholder="********"
+                  placeholderTextColor={theme.subText}
+                />
+
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons
+                    name={showPassword ? "eye" : "eye-outline"}
+                    size={20}
+                    color={theme.text}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
 
@@ -184,11 +178,30 @@ export default function SignUp() {
               <TextInput
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                secureTextEntry
-                className="flex-1 pb-2 text-gray-800"
+                style={{ color: theme.text }}
+                className="flex-1 pb-2 "
                 placeholder="********"
+                placeholderTextColor={theme.subText}
               />
-              <Ionicons name="eye-outline" size={18} color="#6B7280" />
+              <View className="flex-row items-center ">
+                <TextInput
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!showConfirmPassword}
+                  style={{ color: theme.text }}
+                  className="flex-1 pb-2"
+                  placeholder="********"
+                  placeholderTextColor={theme.subText}
+                />
+
+                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  <Ionicons
+                    name={showConfirmPassword ? "eye" : "eye-outline"}
+                    size={20}
+                    color={theme.text}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -221,8 +234,8 @@ export default function SignUp() {
         </View>
 
         {/* Google Button */}
-        <TouchableOpacity className="border border-gray-300 rounded-full py-3 flex-row justify-center items-center space-x-2">
-          <Image style={{height:hp(3), width: wp(6), marginRight:wp(2)}} source={icons.google}/>
+        <TouchableOpacity className="border mb-4 border-gray-300 rounded-full py-3 flex-row justify-center items-center space-x-2">
+          <Image style={{ height: hp(3), width: wp(6), marginRight: wp(2) }} source={icons.google} />
           <Text className="text-gray-700 font-medium">
             Continue with Google
           </Text>
@@ -231,22 +244,37 @@ export default function SignUp() {
     </CustomKeyBoardView>
   );
 }
-const Divider = () => {
-  return <View className="p-[1px] w-full bg-neutral-300" />;
-};
-const styles = StyleSheet.create({
-      dropdown: {
-          height: hp(5),
-          borderColor: "#ccc",
-          borderBottomWidth: wp(0.3),
-          backgroundColor: "#fff",
-          marginBottom: hp(0.3),
-      },
-      header:{
-        fontSize:hp(1.5)
-      },
-      placeholderStyle:{
-          color: '#9ca3af',
-          fontSize: hp(1.5)
-      }
-})
+
+
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    dropdown: {
+      height: hp(5),
+      borderColor: "#ccc",
+      borderBottomWidth: wp(0.3),
+      marginBottom: hp(0.3),
+      backgroundColor: theme.background
+    },
+    header: {
+      fontSize: hp(1.5),
+      color: theme.subText
+    },
+    placeholderStyle: {
+      color: theme.subText,
+      fontSize: hp(1.5)
+    },
+    dropdownContainer: {
+      borderRadius: 8,
+      color: theme.text,
+      backgroundColor: theme.card,
+      elevation: 3, // shadow on Android
+    },
+    selectedTextStyle: {
+      fontSize: 14,
+      color: theme.text,
+    },
+    itemTextStyle: {
+      fontSize: 14,
+      color: theme.text,
+    },
+  })

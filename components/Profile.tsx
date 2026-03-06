@@ -1,11 +1,11 @@
 import { useAuth } from '@/context/authContext';
 import { API_BASE_URL, apiFetch } from '@/utils/api';
+import { darkTheme, lightTheme } from "@/utils/colors";
 import { Ionicons } from '@expo/vector-icons';
-import { useQueryClient } from "@tanstack/react-query";
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
 import { PropsWithChildren, useEffect, useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import GradientButton from './GradientButton';
@@ -14,10 +14,10 @@ import CustomKeyBoardView from './customKeyBoardView';
 
 
 
-type Props = PropsWithChildren<{
+type Props = {
     isVisible: boolean;
     onClose: () => void;
-}>;
+};
 
 type Department = {
     id: string;
@@ -32,7 +32,7 @@ type Course = {
 };
 
 
-export default function Profile({ isVisible, children, onClose }: Props) {
+export default function Profile({ isVisible, onClose }: Props) {
     const [fullName, setFullName] = useState<string>('');
     const [userName, setUserName] = useState<string>('');
     const [courseName, setCourseName] = useState<string>('');
@@ -50,11 +50,38 @@ export default function Profile({ isVisible, children, onClose }: Props) {
     const [aId, setAId] = useState<string>('');
     const [departmentName, setDepartmentName] = useState<string>('');
     const [lId, setLId] = useState<string>('');
-    const queryClient = useQueryClient();
     const [showCourses, setShowCourses] = useState(false);
-
-
+    const scheme = useColorScheme();
+    const theme = scheme === "dark" ? darkTheme : lightTheme;
+    const styles = createStyles(theme);
     const { refreshProfile } = useAuth();
+    const [profile, setProfile] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await apiFetch(`${API_BASE_URL}/api/profiles/me`, {
+                    method: "GET",
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setProfile(data);
+
+                    if (data) {
+                        setFullName(data.name || "");
+                        setUserName(data.username || "");
+                        setPhoneNumber(data.phone || "");
+                        setSelectedImage(data.profile_image || undefined);
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchProfile();
+    }, []);
 
     useEffect(() => {
         const fetchDepartments = async () => {
@@ -115,70 +142,64 @@ export default function Profile({ isVisible, children, onClose }: Props) {
         }
     };
 
-    const handleSaveProfile = async () => {
-        const uri = selectedImage
-        try {
-            let lecturerCoursesPayload: any[] = [];
+const handleSaveProfile = async () => {
+  try {
 
-            if (role === "Lecturer") {
-                if (selectedCourses.length === 0) {
-                    Alert.alert("Error", "Select at least one course");
-                    return;
-                }
+    const payload: any = {};
 
-                lecturerCoursesPayload = selectedCourses.map((id, index) => ({
-                    course_id: id,
-                    is_main: index === 0 // first course is main
-                }));
-            }
-            const res = await apiFetch(`${API_BASE_URL}/api/profiles`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: fullName,
-                    username: userName,
-                    phone: phoneNumber,
-                    profileImage: uri,
+    if (fullName) payload.name = fullName;
+    if (userName) payload.username = userName;
+    if (phoneNumber) payload.phone = phoneNumber;
+    if (selectedImage) payload.profile_image = selectedImage;
 
-                    //student
-                    course_name: courseName,
-                    level: level,
-                    reg_no: regNo,
-                    course_id: selectedCourseId,
-
-                    //admin
-                    A_Id: aId,
-                    department_id: selectedDeptId,
-                    department_name: departmentName,
-
-                    //lecturer
-                    L_Id: lId,
-                    courses: lecturerCoursesPayload
-                }),
-            });
-            if (res.ok) {
-                Alert.alert("Success", "You've Completed Your Profile")
-                // refresh profile in context so other screens can access it
-                try {
-                    await refreshProfile();
-                } catch (err) {
-                    console.log(err)
-                }
-                if (onClose) onClose();
-            }
-            else {
-                const errorData = await res.json();
-                console.error('Profile save error:', errorData);
-                Alert.alert("Error", errorData?.message || "Unknown Error Occurred")
-            }
-            queryClient.invalidateQueries({ queryKey: ["departmentStats"] });
-        }
-        catch (err) {
-            console.error(err);
-            Alert.alert("Error", "Failed ! Try Again")
-        }
+    if (role === "Student") {
+      if (courseName) payload.course_name = courseName;
+      if (level) payload.level = level;
+      if (regNo) payload.reg_no = regNo;
+      if (selectedCourseId) payload.course_id = selectedCourseId;
+      if (selectedDeptId) payload.department_id = selectedDeptId;
     }
-    useEffect(() => {
+
+    if (role === "Admin") {
+      if (aId) payload.A_Id = aId;
+      if (selectedDeptId) payload.department_id = selectedDeptId;
+      if (departmentName) payload.department_name = departmentName;
+    }
+
+    if (role === "Lecturer") {
+      if (lId) payload.L_Id = lId;
+
+      if (selectedCourses.length > 0) {
+        payload.courses = selectedCourses.map((id, index) => ({
+          course_id: id,
+          is_main: index === 0
+        }));
+      }
+    }
+
+    const method = profile ? "PATCH" : "POST";
+
+    const res = await apiFetch(`${API_BASE_URL}/api/profiles`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      Alert.alert("Success", profile ? "Profile updated" : "Profile created");
+
+      await refreshProfile();
+      if (onClose) onClose();
+    } else {
+      const errorData = await res.json();
+      Alert.alert("Error", errorData?.error || "Unknown error");
+    }
+
+  } catch (err) {
+    console.error(err);
+    Alert.alert("Error", "Failed! Try again");
+  }
+};    useEffect(() => {
         const getUserRole = async () => {
             try {
                 const res = await apiFetch(`${API_BASE_URL}/api/users/me`, {
@@ -200,14 +221,14 @@ export default function Profile({ isVisible, children, onClose }: Props) {
     return (
         <>
             {role === "Student" && (
-                <ProfileModalWrapper isVisible={isVisible} onClose={onClose}>
+                <ProfileModalWrapper theme={theme} isVisible={isVisible} onClose={onClose}>
                     {/* Header */}
                     <View className="items-center mb-4">
                         <View className="bg-blue-100 p-3 rounded-full mb-2">
                             <Ionicons name="person-circle-outline" size={40} color="#1E40FF" />
                         </View>
                         <Text style={styles.header} className=" font-bold">Complete Your Profile</Text>
-                        <Text className="text-gray-500 text-lg text-center mt-1">
+                        <Text style={{ color: theme.subText, fontSize: hp(2), marginTop: hp(0.5) }}>
                             Help classmates and lecturers recognize you easily
                         </Text>
                     </View>
@@ -227,7 +248,7 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                                 </Text>
                                 <Text style={{ fontSize: hp(2), fontWeight: 'semibold' }}
                                     className="text-edublue  mt-1">
-                                    Add profile image URL
+                                    Add profile image
                                 </Text>
                             </View>
                         </TouchableOpacity>
@@ -296,14 +317,14 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                 </ProfileModalWrapper>
             )}
             {role === "Admin" && (
-                <ProfileModalWrapper isVisible={isVisible} onClose={onClose}>
+                <ProfileModalWrapper theme={theme} isVisible={isVisible} onClose={onClose}>
                     {/* Header */}
                     <View className="items-center mb-4">
                         <View className="bg-blue-100 p-3 rounded-full mb-2">
                             <Ionicons name="person-circle-outline" size={40} color="#1E40FF" />
                         </View>
-                        <Text style={styles.header} className=" font-bold">Complete Your Profile</Text>
-                        <Text className="text-gray-500 text-md text-center mt-1">
+                        <Text style={[styles.header, { color: theme.text }]}>Complete Your Profile</Text>
+                        <Text style={{ color: theme.subText, fontSize: hp(1.8), marginTop: hp(0.5) }}>
                             Help Students and lecturers recognize you easily
                         </Text>
                     </View>
@@ -311,14 +332,14 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                     <View style={{
                         height: hp(15),
                         borderRadius: hp(4),
-                        marginBottom: hp(2)
-                    }}
-                        className="bg-blue-100">
+                        marginBottom: hp(2),
+                        backgroundColor: theme.surface
+                    }}>
                         <TouchableOpacity onPress={pickImageAsync} className="items-center flex-row  gap-4">
                             <ImageViewer imgSource={placeholder} selectedImage={selectedImage} />
                             <View className='flex-1'>
-                                <Text style={{ fontSize: hp(3), fontWeight: 'bold' }} className="text-black  mt-1">Tap</Text>
-                                <Text style={{ fontSize: hp(2), fontWeight: 'semibold' }} className="text-edublue  mt-1">Add profile image URL</Text>
+                                <Text style={{ fontSize: hp(3), fontWeight: 'bold', color: theme.text }} className=" mt-1">Tap</Text>
+                                <Text style={{ fontSize: hp(2), fontWeight: 'semibold' }} className="text-edublue  mt-1">Add profile image</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -336,24 +357,28 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                         }}
                         search
                         searchPlaceholder="Search department..."
+                        placeholderStyle={{ color: theme.subText }}
                     />
                     <TextInput
                         placeholder='Full Name'
                         value={fullName}
                         onChangeText={setFullName}
                         style={styles.inputs}
+                        placeholderTextColor={theme.subText}
                     />
                     <TextInput
                         placeholder='UserName'
                         value={userName}
                         onChangeText={setUserName}
                         style={styles.inputs}
+                        placeholderTextColor={theme.subText}
                     />
                     <TextInput
                         placeholder='Admin ID i.e. A/123'
                         value={aId}
                         onChangeText={setAId}
                         style={styles.inputs}
+                        placeholderTextColor={theme.subText}
                     />
                     <TextInput
                         placeholder='Phone Number i.e. +254712345678'
@@ -361,13 +386,14 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                         value={phoneNumber}
                         onChangeText={setPhoneNumber}
                         style={styles.inputs}
+                        placeholderTextColor={theme.subText}
                     />
                     <GradientButton title='Save Profile' onPress={handleSaveProfile} />
                 </ProfileModalWrapper>
             )}
 
             {role === "Lecturer" && (
-                <ProfileModalWrapper isVisible={isVisible} onClose={onClose}>
+                <ProfileModalWrapper theme={theme} isVisible={isVisible} onClose={onClose}>
                     {/* Header */}
                     <View className="items-center mb-4">
                         <View className="bg-blue-100 p-3 rounded-full mb-2">
@@ -376,7 +402,7 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                         <Text style={styles.header} className="font-bold">
                             Complete Lecturer Profile
                         </Text>
-                        <Text className="text-gray-500 text-md text-center mt-1">
+                        <Text style={{ color: theme.subText, fontSize: hp(1.8), marginTop: hp(0.5) }}>
                             Let students identify and connect with you easily
                         </Text>
                     </View>
@@ -435,7 +461,7 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                     {/* Course Selector */}
                     {selectedDeptId && (
                         <>
-                            <Text className="mb-1 font-semibold text-gray-700">
+                            <Text style={{ marginBottom: hp(0.5), fontWeight: '600', color: theme.text }}>
                                 Select Courses
                             </Text>
 
@@ -453,7 +479,7 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                                 }}
                             >
                                 {selectedCourses.length === 0 ? (
-                                    <Text className="text-gray-400">
+                                    <Text style={{ color: '#9ca3af' }}>
                                         Tap to select courses
                                     </Text>
                                 ) : (
@@ -540,8 +566,7 @@ export default function Profile({ isVisible, children, onClose }: Props) {
                                                     {isSelected &&
                                                         selectedCourses[0] === course.id && (
                                                             <Text
-                                                                style={{ fontSize: hp(1.6) }}
-                                                                className="text-green-600 mt-1"
+                                                                style={{ fontSize: hp(1.6), color: '#16a34a', marginTop: hp(0.5) }}
                                                             >
                                                                 Main Course
                                                             </Text>
@@ -612,44 +637,58 @@ export default function Profile({ isVisible, children, onClose }: Props) {
     );
 }
 
-const styles = StyleSheet.create({
-    modals: {
-        height: hp(86),
-        width: wp(94),
-        marginHorizontal: wp(3),
-        marginVertical: hp(7),
-        padding: hp(1),
-        overflow: 'hidden',
-    },
-    header: {
-        fontSize: hp(2.5),
-        fontWeight: 'bold',
-    },
-    inputs: {
-        borderWidth: 1,
-        borderColor: '#6b7280',
-        borderRadius: hp(2),
-        paddingVertical: hp(1),
-        paddingHorizontal: wp(2),
-        marginBottom: hp(1.5),
-        color: 'gray-700',
-        height: hp(5)
-    },
-    dropdown: {
-        height: hp(5),
-        borderColor: "#6b7280",
-        borderWidth: wp(0.3),
-        borderRadius: hp(2),
-        paddingHorizontal: wp(2),
-        marginBottom: hp(2),
-    },
-})
+const createStyles = (theme: any) =>
+    StyleSheet.create({
+        modals: {
+            maxHeight: hp(86),
+            width: wp(94),
+            marginHorizontal: wp(3),
+            marginVertical: hp(7),
+            padding: hp(1),
+            overflow: "hidden",
+            backgroundColor: theme.surface,
+            borderRadius: 20,
+        },
+
+        header: {
+            fontSize: hp(2.5),
+            fontWeight: "bold",
+        },
+
+        inputs: {
+            borderWidth: 1,
+            borderColor: theme.subText,
+            borderRadius: hp(2),
+            paddingVertical: hp(1),
+            paddingHorizontal: wp(2),
+            marginBottom: hp(1.5),
+            color: theme.text,
+            backgroundColor: theme.card,
+            height: hp(5),
+        },
+
+        dropdown: {
+            height: hp(5),
+            borderColor: theme.subText,
+            borderWidth: wp(0.3),
+            borderRadius: hp(2),
+            paddingHorizontal: wp(2),
+            marginBottom: hp(2),
+            backgroundColor: theme.card,
+        },
+
+        imageContainer: {
+            backgroundColor: theme.surface,
+            justifyContent: "center",
+        },
+    });
 
 const ProfileModalWrapper = ({
     isVisible,
     onClose,
     children,
-}: PropsWithChildren<{ isVisible: boolean; onClose: () => void }>) => (
+    theme
+}: PropsWithChildren<{ isVisible: boolean; onClose: () => void; theme: any }>) => (
     <Modal
         animationType="slide"
         transparent
@@ -658,12 +697,12 @@ const ProfileModalWrapper = ({
     >
         <BlurView
             intensity={70}
-            tint="dark"
+            tint={theme.background === "#000000" ? "dark" : "light"}
             style={StyleSheet.absoluteFill}
         />
         <CustomKeyBoardView>
-            <View style={styles.modals} className="bg-gray-100 rounded-[20px]">
-                    {children}
+            <View style={[createStyles(theme).modals, { backgroundColor: theme.background, borderRadius: 20 }]}>
+                {children}
             </View>
         </CustomKeyBoardView>
     </Modal>

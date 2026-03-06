@@ -29,6 +29,42 @@ router.get(
   },
 );
 
+router.patch("/", verifyFirebaseToken, async (req, res) => {
+  try {
+    const firebaseUid = req.user.uid;
+
+    const fields = req.body;
+
+    if (Object.keys(fields).length === 0) {
+      return res.status(400).json({ error: "No fields provided" });
+    }
+
+    // Build dynamic SQL
+    const updates = [];
+    const values = [];
+
+    for (const key in fields) {
+      updates.push(`${key} = ?`);
+      values.push(fields[key]);
+    }
+
+    values.push(firebaseUid);
+
+    const query = `
+      UPDATE profiles
+      SET ${updates.join(", ")}
+      WHERE firebase_uid = ?
+    `;
+
+    await db.query(query, values);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.post("/", verifyFirebaseToken, async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
@@ -43,7 +79,6 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
     }
 
     const user = userRows[0];
-    const userId = user.id;
     const role = user.role;
 
     const {
@@ -89,11 +124,13 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
 
     const [existing] = await db.query(
       "SELECT id FROM profiles WHERE firebase_uid=?",
-      [userId],
+      [firebaseUid],
     );
 
     if (existing.length > 0) {
-      return res.status(400).json({ error: "Profile already exists" });
+      return res
+        .status(200)
+        .json({ message: "Profile already exists. Use PATCH to update." });
     }
 
     await db.query(

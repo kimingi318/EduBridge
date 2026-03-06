@@ -23,11 +23,11 @@ router.get("/by-course/:courseId", verifyFirebaseToken, async (req, res) => {
 });
 
 router.post("/", verifyFirebaseToken, async (req, res) => {
-  const { name, code, courseId } = req.body;
+  const { name, code, courseId, level, sem } = req.body;
 
   await db.query(
-    "INSERT INTO units (id, name, code, course_id) VALUES (?, ?, ?, ?)",
-    [randomUUID(), name, code, courseId],
+    "INSERT INTO units (id, name, code, course_id, level,sem) VALUES (?, ?, ?, ?,?,?)",
+    [randomUUID(), name, code, courseId, level, sem],
   );
 
   res.json({ success: true });

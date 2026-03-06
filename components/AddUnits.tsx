@@ -37,6 +37,16 @@ type Props = PropsWithChildren<{
     isVisible: boolean;
     onClose: () => void;
 }>;
+const data = [
+    { label: 'Year 1', value: 'I' },
+    { label: 'Year 2', value: 'II' },
+    { label: 'Year 3', value: 'III' },
+    { label: 'Year 4', value: 'IV' }
+]
+const sems = [
+    { label: 'Sem 1', value: '1' },
+    { label: 'Sem 2', value: '2' },
+]
 
 export default function AddUnits({ isVisible, children, onClose }: Props) {
     const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -48,8 +58,11 @@ export default function AddUnits({ isVisible, children, onClose }: Props) {
     const [courseValue, setCourseValue] = useState<string | null>(null);
 
     const [unitName, setUnitName] = useState("");
+    const [level, setLevel] = useState("");
+    const [sem, setSem] = useState("");
     const [code, setCode] = useState("");
     const [loading, setLoading] = useState(false);
+
 
     useEffect(() => {
         const fetchFaculties = async () => {
@@ -100,9 +113,9 @@ export default function AddUnits({ isVisible, children, onClose }: Props) {
                 if (!res.ok) return;
                 const data: Course[] = await res.json();
                 const labeled = data.map(c => ({
-            ...c,
-            label: c.programme ? `${c.programme} - ${c.name}` : c.name,
-          } as any));
+                    ...c,
+                    label: c.programme ? `${c.programme} - ${c.name}` : c.name,
+                } as any));
                 setCourses(labeled as any);
             } catch (err) {
                 console.error(err);
@@ -112,7 +125,7 @@ export default function AddUnits({ isVisible, children, onClose }: Props) {
     }, [departmentValue]);
 
     const handleAddUnit = async () => {
-        if (!unitName || !code || !courseValue) {
+        if (!unitName || !code || !courseValue || !level || !sem) {
             Alert.alert("Error", "Please fill all fields");
             return;
         }
@@ -127,6 +140,8 @@ export default function AddUnits({ isVisible, children, onClose }: Props) {
                     name: unitName,
                     code,
                     courseId: courseValue,
+                    level,
+                    sem
                 })
 
             });
@@ -215,6 +230,29 @@ export default function AddUnits({ isVisible, children, onClose }: Props) {
                     value={code}
                     onChangeText={setCode}
                 />
+                <Dropdown
+                    style={styles.dropdown}
+                    data={data}
+                    labelField="label"
+                    placeholder="Select Level"
+                    value={level}
+                    valueField="value"
+                    onChange={(item) => {
+                        setLevel(item.value)
+                    }}
+                />
+                <Dropdown
+                    style={styles.dropdown}
+                    data={sems}
+                    labelField="label"
+                    placeholder="Select Level"
+                    value={sem}
+                    valueField="value"
+                    onChange={(item) => {
+                        setSem(item.value)
+                    }}
+                />
+
                 <GradientButton title={loading ? "Adding..." : "Add Unit"}
                     onPress={handleAddUnit} />
             </View>
@@ -230,7 +268,7 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         marginTop: hp(10),
         marginHorizontal: wp(2),
-        height: hp(50)
+        maxHeight: hp(70)
     },
     header: {
         fontSize: hp(2.5),
@@ -243,7 +281,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         borderRadius: 10,
         paddingHorizontal: wp(3),
-        marginBottom: hp(3),
+        marginBottom: hp(1),
         borderWidth: 1,
         borderColor: "#ddd",
     },

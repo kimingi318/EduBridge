@@ -1,7 +1,8 @@
+import { darkTheme, lightTheme } from "@/utils/colors";
 import { Ionicons } from "@expo/vector-icons";
 import * as Linking from 'expo-linking';
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View, useColorScheme } from "react-native";
 export type ClassCardRole = "student" | "lecturer";
 
 
@@ -109,12 +110,14 @@ const ClassCard: React.FC<ClassCardProps> = ({
   onCancel,
   onLate,
 }) => {
+    const scheme = useColorScheme();
+    const theme = scheme === "dark" ? darkTheme : lightTheme;
 
   return (
-    <View className="bg-white rounded-2xl px-2 pb-4">
+    <View style={{backgroundColor: theme.card}} className="rounded-2xl px-2 pb-4">
       <View className="flex-row justify-between">
         <StatusPill classstatus={classstatus} />
-        <Text>{startsIn}</Text>
+        <Text style={{color:theme.text}}>{startsIn}</Text>
       </View>
       <View className="flex-row items-center justify-between mb-3">
         <View className="flex-row items-center gap-3">
@@ -122,8 +125,8 @@ const ClassCard: React.FC<ClassCardProps> = ({
             <Ionicons name="calendar-outline" size={20} color="#1158D8" />
           </View>
           <View>
-            <Text className="font-bold text-lg">{courseTitle}</Text>
-            <Text className="text-gray-500 text-sm">{timePeriod}</Text>
+            <Text style={{color:theme.text}} className="font-bold text-lg">{courseTitle}</Text>
+            <Text style={{color: theme.subText}} className="text-sm">{timePeriod}</Text>
           </View>
         </View>
       </View>

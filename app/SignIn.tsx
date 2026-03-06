@@ -1,4 +1,5 @@
 import icons from "@/constants/icons";
+import { darkTheme, lightTheme } from "@/utils/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import { useState } from "react";
@@ -10,6 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useColorScheme
 } from "react-native";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import CustomKeyBoardView from "../components/customKeyBoardView";
@@ -18,11 +20,16 @@ import GradientButton from "../components/GradientButton";
 import Loading from "../components/loading";
 import { useAuth } from "../context/authContext";
 
+
 export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { signIn } = useAuth();
+  const scheme = useColorScheme();
+  const theme = scheme === "dark" ? darkTheme : lightTheme;
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const handleSignin = async () => {
     if (!email || !password) {
@@ -55,16 +62,16 @@ export default function SignIn() {
               <EduLogo size={35} onPress={() => router.push("/LandingPage")} />
             </View>
             <Text className="text-blue-700 font-bold text-lg">
-              Edu <Text className="color-white">Bridge</Text>.
+              Edu <Text style={{ color: "#fff" }}>Bridge</Text>.
             </Text>
           </View>
         </View>
       </ImageBackground>
 
-      <View className="flex-1 bg-white rounded-t-3xl -mt-10 px-6 pt-6">
-        <Text className="text-xl font-bold text-gray-900 mb-1">Sign In</Text>
+      <View style={{ backgroundColor: theme.background }} className="flex-1 rounded-t-3xl -mt-10 px-3 pt-6">
+        <Text style={{ color: theme.text }} className="text-xl font-bold  mb-1">Sign In</Text>
 
-        <Text className="text-gray-500 mb-6">
+        <Text style={{ color: theme.subText }} className=" mb-6">
           or{" "}
           <Link href="/SignUp">
             <Text className="text-blue-600 font-semibold">Join EduBridge</Text>
@@ -74,34 +81,51 @@ export default function SignIn() {
         {/* Inputs */}
         <View className="space-y-5">
           <View>
-            <Text className="text-xs text-gray-500 mb-1">Email address*</Text>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              className="border-b border-gray-300 pb-2 text-gray-800"
-              placeholder="example@email.com"
-            />
+            <Text style={{ color: theme.subText }} className="text-xs  mb-1">Email address *</Text>
+            <View style={{ borderBottomColor: theme.subText }} className="border-b ">
+              <TextInput
+                value={email}
+                onChangeText={setEmail}
+                style={{ color: theme.text }}
+                className="pb-2"
+                placeholder="example@email.com"
+              />
+            </View>
           </View>
 
           <View>
-            <Text className="text-xs text-gray-500 mb-1">Password*</Text>
-            <View className="flex-row items-center border-b border-gray-300">
+            <Text style={{ color: theme.subText }} className="text-xs  mb-1">Password *</Text>
+            <View style={{ borderBottomColor: theme.subText }} className="flex-row items-center border-b ">
               <TextInput
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
-                className="flex-1 pb-2 text-gray-800"
-                placeholder="********"
+                style={{ color: theme.text }}
+                className="flex-1 "
               />
-              <Ionicons name="eye-outline" size={18} color="#6B7280" />
+              <View className="flex-row items-center">
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  style={{ color: theme.text }}
+                  className="flex-1 pb-2"
+                  placeholderTextColor={theme.subText}
+                />
+
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons
+                    name={showPassword ? "eye" : "eye-outline"}
+                    size={20}
+                    color={theme.text}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
 
-        <Text className="text-xs text-gray-400 mt-6 leading-4"></Text>
-
         {/* Primary Button */}
-        <View>
+        <View className="mt-6">
           {loading ? (
             <View className="flex-row justify-center">
               <Loading size={hp(8)} />
@@ -113,15 +137,15 @@ export default function SignIn() {
 
         {/* Divider */}
         <View className="flex-row items-center my-6">
-          <View className="flex-1 h-[1px] bg-gray-200" />
-          <Text className="mx-3 text-gray-400 text-sm">Or</Text>
-          <View className="flex-1 h-[1px] bg-gray-200" />
+          <View style={{ backgroundColor: theme.subText }} className="flex-1 h-[1px]" />
+          <Text style={{ color: theme.text }} className="mx-3  text-sm">Or</Text>
+          <View style={{ backgroundColor: theme.subText }} className="flex-1 h-[1px]" />
         </View>
 
         {/* Google Button */}
-        <TouchableOpacity className="border border-gray-300 rounded-full py-3 flex-row justify-center items-center space-x-2">
-          <Image style={{height:hp(3), width: wp(6), marginRight:wp(2)}} source={icons.google}/>
-          <Text style={{fontSize: hp(2)}} className="text-gray-700 font-medium">
+        <TouchableOpacity style={{ borderBlockColor: theme.text }} className="border rounded-full py-3 flex-row justify-center items-center space-x-2">
+          <Image style={{ height: hp(3), width: wp(6), marginRight: wp(2) }} source={icons.google} />
+          <Text style={{ fontSize: hp(2), color: theme.subText }} className=" font-medium">
             Continue with Google
           </Text>
         </TouchableOpacity>
