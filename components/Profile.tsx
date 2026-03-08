@@ -142,64 +142,64 @@ export default function Profile({ isVisible, onClose }: Props) {
         }
     };
 
-const handleSaveProfile = async () => {
-  try {
+    const handleSaveProfile = async () => {
+        try {
 
-    const payload: any = {};
+            const payload: any = {};
 
-    if (fullName) payload.name = fullName;
-    if (userName) payload.username = userName;
-    if (phoneNumber) payload.phone = phoneNumber;
-    if (selectedImage) payload.profile_image = selectedImage;
+            if (fullName) payload.name = fullName;
+            if (userName) payload.username = userName;
+            if (phoneNumber) payload.phone = phoneNumber;
+            if (selectedImage) payload.profile_image = selectedImage;
 
-    if (role === "Student") {
-      if (courseName) payload.course_name = courseName;
-      if (level) payload.level = level;
-      if (regNo) payload.reg_no = regNo;
-      if (selectedCourseId) payload.course_id = selectedCourseId;
-      if (selectedDeptId) payload.department_id = selectedDeptId;
-    }
+            if (role === "Student") {
+                if (courseName) payload.course_name = courseName;
+                if (level) payload.level = level;
+                if (regNo) payload.reg_no = regNo;
+                if (selectedCourseId) payload.course_id = selectedCourseId;
+                if (selectedDeptId) payload.department_id = selectedDeptId;
+            }
 
-    if (role === "Admin") {
-      if (aId) payload.A_Id = aId;
-      if (selectedDeptId) payload.department_id = selectedDeptId;
-      if (departmentName) payload.department_name = departmentName;
-    }
+            if (role === "Admin") {
+                if (aId) payload.A_Id = aId;
+                if (selectedDeptId) payload.department_id = selectedDeptId;
+                if (departmentName) payload.department_name = departmentName;
+            }
 
-    if (role === "Lecturer") {
-      if (lId) payload.L_Id = lId;
+            if (role === "Lecturer") {
+                if (lId) payload.L_Id = lId;
 
-      if (selectedCourses.length > 0) {
-        payload.courses = selectedCourses.map((id, index) => ({
-          course_id: id,
-          is_main: index === 0
-        }));
-      }
-    }
+                if (selectedCourses.length > 0) {
+                    payload.courses = selectedCourses.map((id, index) => ({
+                        course_id: id,
+                        is_main: index === 0
+                    }));
+                }
+            }
 
-    const method = profile ? "PATCH" : "POST";
+            const method = profile ? "PATCH" : "POST";
 
-    const res = await apiFetch(`${API_BASE_URL}/api/profiles`, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+            const res = await apiFetch(`${API_BASE_URL}/api/profiles`, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
 
-    if (res.ok) {
-      Alert.alert("Success", profile ? "Profile updated" : "Profile created");
+            if (res.ok) {
+                Alert.alert("Success", profile ? "Profile updated" : "Profile created");
 
-      await refreshProfile();
-      if (onClose) onClose();
-    } else {
-      const errorData = await res.json();
-      Alert.alert("Error", errorData?.error || "Unknown error");
-    }
+                await refreshProfile();
+                if (onClose) onClose();
+            } else {
+                const errorData = await res.json();
+                Alert.alert("Error", errorData?.error || "Unknown error");
+            }
 
-  } catch (err) {
-    console.error(err);
-    Alert.alert("Error", "Failed! Try again");
-  }
-};    useEffect(() => {
+        } catch (err) {
+            console.error(err);
+            Alert.alert("Error", "Failed! Try again");
+        }
+    }; useEffect(() => {
         const getUserRole = async () => {
             try {
                 const res = await apiFetch(`${API_BASE_URL}/api/users/me`, {
@@ -228,22 +228,22 @@ const handleSaveProfile = async () => {
                             <Ionicons name="person-circle-outline" size={40} color="#1E40FF" />
                         </View>
                         <Text style={styles.header} className=" font-bold">Complete Your Profile</Text>
-                        <Text style={{ color: theme.subText, fontSize: hp(2), marginTop: hp(0.5) }}>
+                        <Text style={{ color: theme.subText, fontSize: hp(2),textAlign: "center" }}>
                             Help classmates and lecturers recognize you easily
                         </Text>
                     </View>
                     {/* Profile image */}
                     <View style={{
-                        height: hp(20),
+                        height: hp(15),
                         borderRadius: hp(4),
-                        marginBottom: hp(2)
-                    }}
-                        className="flex-1 bg-blue-100">
+                        marginBottom: hp(2),
+                        backgroundColor:theme.surface
+                    }}>
                         <TouchableOpacity onPress={pickImageAsync} className="items-center flex-row gap-4">
                             <ImageViewer imgSource={placeholder} selectedImage={selectedImage} />
                             <View className='flex-1'>
-                                <Text style={{ fontSize: hp(3), fontWeight: 'bold' }}
-                                    className="text-black  mt-1">
+                                <Text style={{ fontSize: hp(3), fontWeight: 'bold',color: theme.text }}
+                                    className="mt-1">
                                     Tap
                                 </Text>
                                 <Text style={{ fontSize: hp(2), fontWeight: 'semibold' }}
@@ -324,7 +324,7 @@ const handleSaveProfile = async () => {
                             <Ionicons name="person-circle-outline" size={40} color="#1E40FF" />
                         </View>
                         <Text style={[styles.header, { color: theme.text }]}>Complete Your Profile</Text>
-                        <Text style={{ color: theme.subText, fontSize: hp(1.8), marginTop: hp(0.5) }}>
+                        <Text style={{ color: theme.subText, fontSize: hp(1.8),textAlign: "center" }}>
                             Help Students and lecturers recognize you easily
                         </Text>
                     </View>
@@ -640,7 +640,7 @@ const handleSaveProfile = async () => {
 const createStyles = (theme: any) =>
     StyleSheet.create({
         modals: {
-            maxHeight: hp(86),
+            maxHeight: hp(100),
             width: wp(94),
             marginHorizontal: wp(3),
             marginVertical: hp(7),
