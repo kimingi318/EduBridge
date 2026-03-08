@@ -22,6 +22,21 @@ router.get("/by-course/:courseId", verifyFirebaseToken, async (req, res) => {
   res.json(rows);
 });
 
+//returb units belonging to a course nad level
+router.get(
+  "/by-course/level/:courseId/:level",
+  verifyFirebaseToken,
+  async (req, res) => {
+    const { courseId } = req.params;
+    const { level } = req.params;
+    const [rows] = await db.query(
+      "SELECT name,id FROM units WHERE course_id = ? AND level = ?",
+      [courseId, level],
+    );
+    res.json(rows);
+  },
+);
+
 router.post("/", verifyFirebaseToken, async (req, res) => {
   const { name, code, courseId, level, sem } = req.body;
 
