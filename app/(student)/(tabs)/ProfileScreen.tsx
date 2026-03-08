@@ -69,7 +69,7 @@ export default function ProfileScreen() {
               {profile?.course_name || ""}
             </Text>
             <Text className="text-slate-300 text-xs">
-              {""}· {profile?.level || ""}
+              {"Year"} · {profile?.level || ""}
             </Text>
           </View>
 

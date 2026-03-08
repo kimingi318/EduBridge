@@ -3,20 +3,23 @@ import ProfileAvatar from "@/components/ProfileAvatar";
 import SearchBar from "@/components/searchBar";
 import { useAuth } from '@/context/authContext';
 import { API_BASE_URL, apiFetch } from "@/utils/api";
+import { darkTheme, lightTheme } from "@/utils/colors";
 import { getTimeRemaining } from '@/utils/time';
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  ImageBackground,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
+  useColorScheme
 } from "react-native";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import { blurhash } from "../../../utils/common";
+
+
 
 
 export default function HomeScreen() {
@@ -24,6 +27,8 @@ export default function HomeScreen() {
   const { profile } = useAuth();
   const [sessions, setSessions] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
+  const scheme = useColorScheme();
+  const theme = scheme === "dark" ? darkTheme : lightTheme;
 
   useEffect(() => {
     if (!sessions.length) {
@@ -53,7 +58,6 @@ export default function HomeScreen() {
     setClasses(mapped);
   }, [sessions]);
 
-
   useEffect(() => {
     if (!profile) return;
     if (!profile.course_id) {
@@ -62,7 +66,7 @@ export default function HomeScreen() {
     }
     const fetchSchedule = async () => {
       try {
-        const res = await apiFetch(`${API_BASE_URL}/api/sessions/by-course/${profile.course_id}`, {
+        const res = await apiFetch(`${API_BASE_URL}/api/sessions/by-course/${profile.course_id}/${profile.level}`, {
           method: 'GET',
         });
         if (res.ok) {
@@ -80,13 +84,10 @@ export default function HomeScreen() {
 
 
   return (
-    <View className="flex-1">
-      <ImageBackground source={require("../../../assets/images/main-bg-img.jpg")}>
+    <View style={{flex:1, backgroundColor: theme.background}}>
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* HEADER */}
-          <View
-            style={{ marginTop: hp(6) }}
-            className="px-5 flex-1 items-center pb-8 ">
+          <View style={{marginTop: hp(4), backgroundColor: theme.background}} className="px-5 flex-1 items-center pb-8 ">
             <View className="flex-row items-center justify-between">
               <View style={{ paddingHorizontal: wp(2) }}
                 className="flex-row items-center ">
@@ -96,10 +97,10 @@ export default function HomeScreen() {
                   dotColor="#22C55E"   // green
                 />
                 <View>
-                  <Text style={{ fontSize: hp(1.5) }} className="text-white   font-inter-bold">
+                  <Text style={{ fontSize: hp(1.5),color:theme.text }} className="font-inter-bold">
                     Good morning, {profile?.username || 'Student'}
                   </Text>
-                  <Text style={{ fontSize: hp(1.5) }} className="text-blue-200  font-inter">
+                  <Text style={{ fontSize: hp(1.5),color:theme.subText }} className="font-inter">
                     {profile?.level || ''} {profile?.course_name ? `· ${profile.course_name}` : 'Go to Profile and update profile'}
                   </Text>
                 </View>
@@ -111,21 +112,21 @@ export default function HomeScreen() {
           </View>
 
           {/* CONTENT */}
-          <View className="bg-gray-100 -mt-6 rounded-t-[30px] px-2 pt-3">
+          <View style={{backgroundColor:theme.surface}} className=" -mt-6 rounded-t-[30px] px-2 pt-3">
             {/* TODAY'S SCHEDULE */}
             <SectionHeader title="Today’s Classes" right="TimeTable" />
             <View>
               {classes.length > 0 ? (
                 <ClassCarousel sessions={classes} role="student" />
               ) : (
-                <Text className="text-gray-500 mt-2">No schedule Today</Text>
+                <Text style={{color: theme.subText}} className=" mt-2">No schedule Today</Text>
               )}
             </View>
 
             {/* EVENTS */}
             <SectionHeader
               title="Events"
-              right={<Text className="text-edublue font-semibold" onPress={() => router.push("/NotificationScreen")}>
+              right={<Text style={{color:theme.text}} className="font-semibold" onPress={() => router.push("/NotificationScreen")}>
                 See all</Text>} />
             <View>
               <View className="flex-row justify-center gap-2 items-center mb-3">
@@ -142,7 +143,7 @@ export default function HomeScreen() {
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {/* Event Card */}
-                <View className="bg-white rounded-2xl w-64 mr-4 overflow-hidden shadow">
+                <View style={{backgroundColor: theme.card}} className="rounded-2xl w-64 mr-4 overflow-hidden shadow">
                   <Image
                     source={require("../../../assets/images/Graduation-event-img.jpg")}
                     style={{ height: hp(12) }}
@@ -151,8 +152,8 @@ export default function HomeScreen() {
                   />
                   <View className="p-3">
                     <Text className="text-green-600 text-xs">FRI 21 NOV</Text>
-                    <Text className="font-bold">14th Graduation Ceremony</Text>
-                    <Text className="text-gray-500 text-sm">
+                    <Text style={{color:theme.text}} className="font-bold">14th Graduation Ceremony</Text>
+                    <Text style={{color:theme.subText}} className="text-gray-500 text-sm">
                       8am – 5pm · Chuka Pavilion
                     </Text>
                   </View>
@@ -178,7 +179,7 @@ export default function HomeScreen() {
             {/* MEMOS */}
             <SectionHeader
               title="Annoucements"
-              right={<Text className="text-edublue font-semibold"
+              right={<Text style={{color:theme.text}} className=" font-semibold"
                 onPress={() => router.push("/NotificationScreen")}>See all</Text>} />
             <View className=" mb-10">
               <Memo
@@ -201,7 +202,6 @@ export default function HomeScreen() {
             </View>
           </View>
         </ScrollView>
-      </ImageBackground>
     </View>
   );
 }
@@ -235,12 +235,17 @@ function Memo({
     </View>
   );
 }
-const SectionHeader = ({ title, right }: any) => (
-  <View className="flex-row justify-between items-center mt-4 mb-4">
-    <Text className="text-lg font-bold">{title}</Text>
-    <TouchableOpacity>
-      <Text className="text-blue-600">{right} ›</Text>
-    </TouchableOpacity>
-  </View>
-);
+const SectionHeader = ({ title, right }: any) => {
+  const scheme = useColorScheme();
+  const theme = scheme === "dark" ? darkTheme : lightTheme;
+
+  return (
+    <View className="flex-row justify-between items-center mt-4 mb-4">
+      <Text style={{ color: theme.text }} className="text-lg font-bold">{title}</Text>
+      <TouchableOpacity>
+        <Text style={{ color: theme.text, }}>{right}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
