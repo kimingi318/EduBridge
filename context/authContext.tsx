@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   type User,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import {
   createContext,
   useContext,
@@ -18,6 +18,7 @@ import {
 import { auth, db } from "../firebaseConfig";
 
 interface CustomUser extends User {
+  regNo?: string;
   role?: string;
   userId?: string;
 }
@@ -33,7 +34,7 @@ export const AuthContext = createContext<{
   signUp: (
     email: string,
     password: string,
-    role: string
+    regNo: string,
   ) => Promise<{ success: boolean; data?: any; error?: string }>;
   signOut: () => Promise<void>;
   isAuthenticating: boolean | undefined;
@@ -72,16 +73,33 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
         setIsAuthenticating(true);
         setUser(user as CustomUser);
 
-        updateUserData(user.uid);
-
         // Load cached profile immediately
         const cachedProfile = await loadProfileFromStorage();
         if (cachedProfile) {
           setProfile(cachedProfile);
         }
 
-        // Fetch fresh profile when auth state becomes available
-        (async () => {
+        // Fetch role
+        const rolePromise = (async () => {
+          try {
+            const token = await user.getIdToken();
+            const res = await fetch(`${API_BASE_URL}/api/users/me`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setUser((prev) =>
+                prev ? { ...prev, role: data.role } : prev
+              );
+              console.log(data?.role);
+            }
+          } catch (err) {
+            console.warn("failed to get the role", err);
+          }
+        })();
+
+        // Fetch fresh profile
+        const profilePromise = (async () => {
           try {
             const token = await user.getIdToken();
             const res = await fetch(`${API_BASE_URL}/api/profiles/me`, {
@@ -99,6 +117,10 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
             setProfile(null);
           }
         })();
+
+        // Await both promises before setting isAuthenticating to false
+        await Promise.all([rolePromise, profilePromise]);
+        setIsAuthenticating(false);  // NEW: Now safe to mark as done
       } else {
         setIsAuthenticating(false);
         setUser(null);
@@ -108,15 +130,6 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
     });
     return unsub;
   }, []);
-  const updateUserData = async (userId: any) => {
-    const docRef = doc(db, 'users', userId)
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      let data = docSnap.data();
-      setUser({ ...user as CustomUser, role: data.role, userId: data.userId })
-    }
-  }
 
   const signIn = async (
     email: string,
@@ -168,6 +181,7 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       await firebaseSignOut(auth);
       console.log("User signed out");
       setProfile(null);
+      setUser(null);
       await AsyncStorage.removeItem("userProfile");
     } catch (error) {
       console.error("Error during sign out:", error);
@@ -189,12 +203,8 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
       );
       console.log("User signed up:");
       await setDoc(doc(db, "users", response?.user?.uid), {
-        role,
         userId: response?.user?.uid,
       });
-      // setUser((prev)=>
-      //   prev? {...prev,role: response?.user?.role}
-      // )
       const token = await response?.user?.getIdToken();
 
       try {
