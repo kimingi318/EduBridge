@@ -4,17 +4,17 @@ import { useQueryClient } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
 import { PropsWithChildren, useEffect, useState } from 'react';
 import {
-    Alert,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import {
-    heightPercentageToDP as hp,
-    widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import GradientButton from './GradientButton';
 
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginTop: hp(10),
     marginHorizontal: wp(2),
-    height: hp(60),
+    maxHeight: hp(80),
   },
   header: {
     fontSize: hp(2.5),
