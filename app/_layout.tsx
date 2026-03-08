@@ -10,9 +10,10 @@ import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContextProvider, useAuth } from "../context/authContext";
 
+SplashScreen.preventAutoHideAsync();  
+
 export function RootLayout() {
-  const { user } = useAuth();
-  const { isAuthenticating } = useAuth();
+  const { user, isAuthenticating } = useAuth();  
   const segments = useSegments();
   const router = useRouter();
   const [fontsLoaded] = useFonts({
@@ -31,37 +32,52 @@ export function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
+    if (fontsLoaded && !isAuthenticating) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, isAuthenticating]);
 
   useEffect(() => {
-    if (typeof isAuthenticating === "undefined") return;
-    const publicRoutes = ["LandingPage", "SignIn", "SignUp"];
-    const isPublicRoute = publicRoutes.includes(segments[0]);
-    const inApp =
-      segments[0] === "(admin)" ||
-      segments[0] === "(lecturer)" ||
-      segments[0] === "(student)";
-    if (isAuthenticating) {
-      if (!user) return;
-      if (!inApp) {
-        const role = user?.role;
-        switch (role) {
-          case "Admin":
-            router.replace("/(admin)/(tabs)/HomeScreen");
-            return;
-          case "Lecturer":
-            router.replace("/(lecturer)/(tabs)/HomeScreen");
-            return;
-          case "Student":
-            router.replace("/(student)/(tabs)/HomeScreen");
-        }
+    const timer = setTimeout(() => {
+      if (!fontsLoaded || isAuthenticating) {
+        console.warn('Force-hiding splash after timeout');
+        SplashScreen.hideAsync();
       }
-    } else if (!isAuthenticating || user === null) {
+    }, 10000);
+    return () => clearTimeout(timer);
+  });
+
+  // navigate based on auth state; run after first render so <Slot /> is mounted.
+  useEffect(() => {
+    // wait until authentication has finished initializing
+    if (isAuthenticating === undefined) return;
+
+    const publicRoutes = ["LandingPage", "SignIn", "SignUp"];
+    const isPublicRoute = publicRoutes.includes(segments[0] || '');
+
+    if (!user) {
       if (!isPublicRoute) {
         router.replace("/SignIn");
+      }
+      return;
+    }
+
+    if (!user.role) {
+      console.warn('User loaded without role—check auth fetches');
+      return;
+    }
+
+    if (isPublicRoute) {
+      switch (user.role) {
+        case "Admin":
+          router.replace("/(admin)/(tabs)/HomeScreen");
+          break;
+        case "Lecturer":
+          router.replace("/(lecturer)/(tabs)/HomeScreen");
+          break;
+        case "Student":
+          router.replace("/(student)/(tabs)/HomeScreen");
+          break;
       }
     }
   }, [user, isAuthenticating, router, segments]);
@@ -69,7 +85,7 @@ export function RootLayout() {
   return <Slot />;
 }
 
-// A wrapper that adapts safe area + status bar to theme
+// A wrapper that adapts safe area + status bar to theme (unchanged—good stuff!)
 function AdaptiveWrapper({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme();
@@ -77,8 +93,8 @@ function AdaptiveWrapper({ children }: { children: React.ReactNode }) {
   const theme = scheme === "dark" ? darkTheme : lightTheme;
 
   return (
-    <View style={{ flex: 1, backgroundColor:theme.background, paddingTop: insets.top + hp(1) }}>
-      <StatusBar style={barStyle} animated/>
+    <View style={{ flex: 1, backgroundColor: theme.background, paddingTop: insets.top + hp(1) }}>
+      <StatusBar style={barStyle} animated />
       {children}
     </View>
   );
@@ -90,9 +106,9 @@ export default function RootNavigator() {
       <QueryClientProvider client={new QueryClient()}>
         <MenuProvider>
           <AuthContextProvider>
-              <AdaptiveWrapper>
-                <RootLayout />
-              </AdaptiveWrapper>
+            <AdaptiveWrapper>
+              <RootLayout />
+            </AdaptiveWrapper>
           </AuthContextProvider>
         </MenuProvider>
       </QueryClientProvider>
