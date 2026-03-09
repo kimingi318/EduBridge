@@ -10,10 +10,8 @@ import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuthContextProvider, useAuth } from "../context/authContext";
 
-SplashScreen.preventAutoHideAsync();  
-
 export function RootLayout() {
-  const { user, isAuthenticating } = useAuth();  
+  const { user, isAuthenticating } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const [fontsLoaded] = useFonts({
@@ -32,29 +30,24 @@ export function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded && !isAuthenticating) {
+    if (fontsLoaded && isAuthenticating !== undefined) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, isAuthenticating]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!fontsLoaded || isAuthenticating) {
-        console.warn('Force-hiding splash after timeout');
-        SplashScreen.hideAsync();
-      }
-    }, 10000);
-    return () => clearTimeout(timer);
-  });
-
-  // navigate based on auth state; run after first render so <Slot /> is mounted.
-  useEffect(() => {
-    // wait until authentication has finished initializing
     if (isAuthenticating === undefined) return;
+    if (isAuthenticating) return;
 
     const publicRoutes = ["LandingPage", "SignIn", "SignUp"];
-    const isPublicRoute = publicRoutes.includes(segments[0] || '');
+    const isPublicRoute = publicRoutes.includes(segments[0]);
 
+    const inApp =
+      segments[0] === "(admin)" ||
+      segments[0] === "(lecturer)" ||
+      segments[0] === "(student)";
+
+    // 🔹 No user → go to SignIn
     if (!user) {
       if (!isPublicRoute) {
         router.replace("/SignIn");
@@ -62,12 +55,11 @@ export function RootLayout() {
       return;
     }
 
-    if (!user.role) {
-      console.warn('User loaded without role—check auth fetches');
-      return;
-    }
+    // 🔹 Wait until role exists
+    if (!user.role) return;
 
-    if (isPublicRoute) {
+    // 🔹 User exists → redirect to correct app
+    if (!inApp) {
       switch (user.role) {
         case "Admin":
           router.replace("/(admin)/(tabs)/HomeScreen");
@@ -80,12 +72,13 @@ export function RootLayout() {
           break;
       }
     }
-  }, [user, isAuthenticating, router, segments]);
+
+  }, [user?.role, isAuthenticating,router,user, segments]);
 
   return <Slot />;
 }
 
-// A wrapper that adapts safe area + status bar to theme (unchanged—good stuff!)
+// A wrapper that adapts safe area + status bar to theme
 function AdaptiveWrapper({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
   const scheme = useColorScheme();

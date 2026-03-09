@@ -91,7 +91,6 @@ export const AuthContextProvider = ({ children }: PropsWithChildren) => {
               setUser((prev) =>
                 prev ? { ...prev, role: data.role } : prev
               );
-              console.log(data?.role);
             }
           } catch (err) {
             console.warn("failed to get the role", err);
