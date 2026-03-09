@@ -50,6 +50,38 @@ const NotificationsScreen = () => {
 
         return unsubscribe;
     }, []);
+    const filteredAnnouncements = useMemo(() => {
+        if (!user) return [];
+
+        if (role === "Admin") {
+            // Admin sees only what he created
+            return announcements.filter(
+                (a) => a.createdByRole === "Admin"
+            );
+        }
+
+        if (role === "Lecturer") {
+            return announcements.filter((a) =>
+                // From Admin to Lecturer
+                (a.createdByRole === "Admin" && a.targetRole === "Lecturer") ||
+
+                // Lecturer created for students
+                (a.createdByRole === "Lecturer" && a.targetRole === "Student")
+            );
+        }
+
+        if (role === "Student") {
+            return announcements.filter((a) =>
+                // Lecturer to Student
+                (a.createdByRole === "Lecturer" && a.targetRole === "Student") ||
+
+                // Admin to Student
+                (a.createdByRole === "Admin" && a.targetRole === "Student")
+            );
+        }
+
+        return [];
+    }, [announcements, role, user]);
 
     const showCreateButton = useMemo(() => {
         if (role === "Student") {
@@ -72,7 +104,7 @@ const NotificationsScreen = () => {
             </View>
         );
     }
-    
+
     const handleCreatePress = () => {
         if (activeTab === "events") setIsAddEventModalVisible(true);
         if (activeTab === "announcements") setIsAddAnnouncementModalVisible(true);
@@ -163,7 +195,7 @@ const NotificationsScreen = () => {
                 )}
                 {activeTab === "announcements" && (
                     <FlatList
-                        data={announcements}
+                        data={filteredAnnouncements}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <AnnouncementCard
@@ -191,7 +223,7 @@ const NotificationsScreen = () => {
                         borderRadius: hp(3.5),
                         alignItems: "center",
                         justifyContent: "center",
-                        elevation: 6, 
+                        elevation: 6,
                         shadowColor: theme.primary,
                         shadowOpacity: 0.3,
                         shadowRadius: 4,
