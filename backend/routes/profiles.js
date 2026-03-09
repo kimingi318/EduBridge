@@ -15,6 +15,14 @@ router.get("/me", verifyFirebaseToken, async (req, res) => {
 
   res.json(rows[0] || null);
 });
+router.get("/by-id/:createdBy", verifyFirebaseToken, async (req, res) => {
+  const { createdBy } = req.params;
+  const [rows] = await db.query("SELECT name FROM profiles WHERE id = ?", [
+    createdBy,
+  ]);
+
+  res.json(rows[0] || null);
+});
 
 router.get(
   "/by-department/:department_Id",
