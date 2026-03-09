@@ -14,7 +14,6 @@ const ProfileScreen = () => {
   const scheme = useColorScheme();
   const theme = scheme === "dark" ? darkTheme : lightTheme;
   const styles = createStyles(theme);
-  console.log(user)
 
   const handleSignOut = async () => {
     await signOut();
