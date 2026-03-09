@@ -1,5 +1,7 @@
+import AppDropdown from '@/components/AppDropDown';
 import { useAuth } from '@/context/authContext';
 import { API_BASE_URL, apiFetch } from '@/utils/api';
+import { darkTheme, lightTheme } from '@/utils/colors';
 import { useQueryClient } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
 import { PropsWithChildren, useEffect, useState } from 'react';
@@ -10,13 +12,14 @@ import {
   Text,
   TextInput,
   View,
+  useColorScheme
 } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 import GradientButton from './GradientButton';
+
 
 
 type Course = {
@@ -41,10 +44,11 @@ type Props = PropsWithChildren<{
 
 export default function AddClassSchedule({ isVisible, children, onClose }: Props) {
   const { profile } = useAuth();
-
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   const [courses, setCourses] = useState<Course[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
-  const [lecturers, setLecturers] = useState<Unit[]>([]);
+  const [lecturers, setLecturers] = useState<Lecturer[]>([]);
 
   const [courseValue, setCourseValue] = useState<string | null>(null);
   const [unitValue, setUnitValue] = useState<string | null>(null);
@@ -182,40 +186,34 @@ export default function AddClassSchedule({ isVisible, children, onClose }: Props
       <View style={styles.container}>
         <Text style={styles.header}>Add Class Session</Text>
 
-        <Dropdown
-          style={styles.dropdown}
+        <AppDropdown
           data={courses}
           labelField="label"
           valueField="id"
           placeholder="Select Course"
           value={courseValue}
           onChange={(item) => setCourseValue(item.id)}
-          search
-          searchPlaceholder="Search courses..."
+          theme={theme}
         />
-        <Dropdown
-          style={styles.dropdown}
+        <AppDropdown
           data={units}
           labelField="name"
           valueField="id"
           placeholder="Select Unit"
           value={unitValue}
           onChange={(item) => setUnitValue(item.id)}
+          theme={theme}
           disable={!courseValue}
-          search
-          searchPlaceholder="Search units..."
         />
-        <Dropdown
-          style={styles.dropdown}
+        <AppDropdown
           data={lecturers}
           labelField="name"
           valueField="id"
           placeholder="Select Lecturer"
           value={lecturerValue}
           onChange={(item) => setLecturerValue(item.id)}
+          theme={theme}
           disable={!unitValue}
-          search
-          searchPlaceholder="Search lecturer..."
         />
 
         <TextInput
