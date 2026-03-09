@@ -46,13 +46,30 @@ const data = [
     { label: 'Year 3', value: 'III' },
     { label: 'Year 4', value: 'IV' }
 ]
+const lecturerToStudentTitles = [
+    { label: "Sit-In CAT", value: "Sit-In CAT" },
+    { label: "Assignment Submission", value: "Assignment Submission" },
+    { label: "Make-Up Class", value: "Make-Up Class" },
+];
+const AdminToStudentTitles = [
+    { label: "Exam Results", value: "Exam Results" },
+    { label: "Transcripts", value: "Transcripts Ready" },
+];
+
+const adminToLecturerTitles = [
+    { label: "Student Result Submission", value: "Student Result Submission" },
+    { label: "Lecturer Meeting", value: "Lecturer Meeting" },
+];
 
 export default function CreateAnnouncement({ isVisible, onClose }: Props) {
-    const { profile } = useAuth();
+    const { profile, user } = useAuth();
+    const isAdmin = user?.role === "Admin";
+    const isLecturer = user?.role === "Lecturer";
     const scheme = useColorScheme();
     const theme = scheme === "dark" ? darkTheme : lightTheme;
     const [courseValue, setCourseValue] = useState<string | null>(null);
     const [unitValue, setUnitValue] = useState<string | null>(null);
+    const [recipientType, setRecipientType] = useState<"Student" | "Lecturer" | null>(null);
     const [title, setTitle] = useState("");
     const [message, setMessage] = useState("");
     const [level, setLevel] = useState("");
@@ -60,7 +77,19 @@ export default function CreateAnnouncement({ isVisible, onClose }: Props) {
     const [courses, setCourses] = useState<Course[]>([]);
     const [units, setUnits] = useState<Unit[]>([]);
     const styles = createStyles(theme);
+    const [unitName , setUnitName] = useState("");
 
+    const titleOptions =
+        recipientType === "Lecturer"
+            ? adminToLecturerTitles
+            :recipientType === "Student"? AdminToStudentTitles:
+             lecturerToStudentTitles;
+
+    useEffect(() => {
+        if (isLecturer) {
+            setRecipientType("Student");
+        }
+    }, [isLecturer]);
 
     const handleCreateAnnouncement = async () => {
         if (!title || !message) {
@@ -74,10 +103,13 @@ export default function CreateAnnouncement({ isVisible, onClose }: Props) {
             await addDoc(collection(db, "announcements"), {
                 title,
                 message,
-                courseId: courseValue,
-                classId: unitValue,
-                level,
+                targetRole: recipientType,
+                courseId: recipientType === "Student" ? courseValue : null,
+                classId: recipientType === "Student" ? unitValue : null,
+                unitName,
+                level: recipientType === "Student" ? level : null,
                 createdBy: profile?.id,
+                createdByRole: user?.role,
                 createdAt: serverTimestamp(),
             });
 
@@ -92,14 +124,14 @@ export default function CreateAnnouncement({ isVisible, onClose }: Props) {
     };
 
     useEffect(() => {
-        if (!profile.department_id) return;
+        if (!profile?.department_id) return;
 
         setCourseValue(null);
 
         const fetchCourses = async () => {
             try {
                 const res = await apiFetch(
-                    `${API_BASE_URL}/api/courses/by-department/${profile.department_id}`
+                    `${API_BASE_URL}/api/courses/by-department/${profile?.department_id}`
                 );
                 if (!res.ok) return;
                 const data: Course[] = await res.json();
@@ -113,7 +145,7 @@ export default function CreateAnnouncement({ isVisible, onClose }: Props) {
             }
         };
         fetchCourses();
-    }, [profile.department_id]);
+    }, [profile?.department_id]);
 
 
     //get units
@@ -123,7 +155,7 @@ export default function CreateAnnouncement({ isVisible, onClose }: Props) {
         const fetchUnits = async () => {
             try {
                 const url = `${API_BASE_URL}/api/units/by-course/level/${courseValue}/${level}`
-                const res = await apiFetch(url,{method: 'GET'});
+                const res = await apiFetch(url, { method: 'GET' });
                 if (!res.ok) return;
                 const data: Unit[] = await res.json();
                 const labeledUnits = data.map(u => ({
@@ -150,12 +182,45 @@ export default function CreateAnnouncement({ isVisible, onClose }: Props) {
                     </Text>
                 </View>
 
+                {isAdmin && (
+                    <>
+                        <Text style={{ color: theme.text }}>Send To</Text>
+                        <Dropdown
+                            style={styles.dropdown}
+                            data={[
+                                { label: "Student", value: "Student" },
+                                { label: "Lecturer", value: "Lecturer" },
+                            ]}
+                            labelField="label"
+                            valueField="value"
+                            placeholder="Select Recipient"
+                            placeholderStyle={styles.placeholderStyle}
+                            containerStyle={styles.dropdownContainer}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            itemTextStyle={styles.itemTextStyle}
+                            value={recipientType}
+                            onChange={(item) => {
+                                setRecipientType(item.value);
+                                setLevel("");
+                                setUnitValue(null);
+                            }}
+                        />
+                    </>
+                )}
+
                 <Text style={{ color: theme.text }}>Title</Text>
-                <TextInput
+                <Dropdown
+                    style={styles.dropdown}
+                    data={titleOptions}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Select Title"
+                    placeholderStyle={styles.placeholderStyle}
+                    containerStyle={styles.dropdownContainer}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    itemTextStyle={styles.itemTextStyle}
                     value={title}
-                    onChangeText={setTitle}
-                    className="border rounded-xl px-4 py-3 mb-4"
-                    style={{ color: theme.text, borderColor: theme.text }}
+                    onChange={(item) => setTitle(item.value)}
                 />
 
                 <Text style={{ color: theme.text }}>Message</Text>
@@ -187,40 +252,47 @@ export default function CreateAnnouncement({ isVisible, onClose }: Props) {
                     }}
                 />
 
-                <Text style={{ color: theme.text }}>Level</Text>
-                <Dropdown
-                    style={styles.dropdown}
-                    data={data}
-                    labelField="label"
-                    placeholder="Select Level"
-                    value={level}
-                    placeholderStyle={styles.placeholderStyle}
-                    containerStyle={styles.dropdownContainer}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    itemTextStyle={styles.itemTextStyle}
-                    valueField="value"
-                    onChange={(item) => {
-                        setLevel(item.value)
-                    }}
-                />
+                {recipientType === "Student" && (
+                    <>
+                        <Text style={{ color: theme.text }}>Level</Text>
+                        <Dropdown
+                            style={styles.dropdown}
+                            data={data}
+                            labelField="label"
+                            placeholder="Select Level"
+                            value={level}
+                            placeholderStyle={styles.placeholderStyle}
+                            containerStyle={styles.dropdownContainer}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            itemTextStyle={styles.itemTextStyle}
+                            valueField="value"
+                            onChange={(item) => {
+                                setLevel(item.value)
+                            }}
+                        />
 
-                <Text style={{ color: theme.text }}>Unit Class</Text>
-                <Dropdown
-                    style={styles.dropdown}
-                    data={units}
-                    labelField="label"
-                    valueField="id"
-                    placeholder="Select Course"
-                    value={unitValue}
-                    placeholderStyle={styles.placeholderStyle}
-                    containerStyle={styles.dropdownContainer}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    itemTextStyle={styles.itemTextStyle}
-                    disable={!courseValue}
-                    onChange={(item) => {
-                        setUnitValue(item.id);
-                    }}
-                />
+                        <Text style={{ color: theme.text }}>Unit Class</Text>
+                        <Dropdown
+                            style={styles.dropdown}
+                            data={units}
+                            labelField="label"
+                            valueField="id"
+                            placeholder="Select Course"
+                            value={unitValue}
+                            placeholderStyle={styles.placeholderStyle}
+                            containerStyle={styles.dropdownContainer}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            itemTextStyle={styles.itemTextStyle}
+                            disable={!courseValue}
+                            onChange={(item) => {
+                                setUnitValue(item.id);
+                                setUnitName(item.name);
+                            }}
+                        />
+
+                    </>
+                )}
+
 
                 <TouchableOpacity onPress={handleCreateAnnouncement} className="bg-green-600 py-4 rounded-xl items-center">
                     {loading ? <ActivityIndicator color="white" /> : <Text className="text-white">Post Announcement</Text>}
@@ -263,7 +335,7 @@ const createStyles = (theme: any) =>
             paddingBottom: hp(1),
             paddingHorizontal: wp(1.5),
             borderRadius: 30,
-            flex:1,
+            flex: 1,
             marginTop: hp(10),
             marginHorizontal: wp(2),
             maxHeight: hp(65),
