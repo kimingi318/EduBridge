@@ -1,4 +1,6 @@
 import AnnouncementCard from "@/components/AnnouncementCard";
+import MemoCard from "./MemoCard";
+import EventCard from "./EventCard";
 import { useAuth } from "@/context/authContext";
 import { db } from "@/firebaseConfig";
 import { darkTheme, lightTheme } from "@/utils/colors";
@@ -29,12 +31,55 @@ const NotificationsScreen = () => {
     const [isAddRequestModalVisible, setIsAddRequestModalVisible] = useState(false);
     const [isAddEventModalVisible, setIsAddEventModalVisible] = useState(false);
     const [announcements, setAnnouncements] = useState<any[]>([]);
+    const [memos, setMemos] = useState<any[]>([]);
+    const [events, setEvents] = useState<any[]>([]);
     const tabs =
         role === "Admin"
             ? adminTabs
             : role === "Lecturer"
                 ? lecturerTabs
                 : studentTabs;
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            collection(db, "events"),
+            (snapshot) => {
+                const data = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setEvents(data);
+            }
+        );
+
+        return unsubscribe;
+    }, []);
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            collection(db, "memos"),
+            (snapshot) => {
+                const data = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setMemos(data);
+            }
+        );
+
+        return unsubscribe;
+    }, []);
+
+    const filteredMemos = useMemo(() => {
+        if (!user) return [];
+
+        if (role === "Admin") return memos;
+
+        return memos.filter(
+            (memo) =>
+                memo.targetRole === role || memo.targetRole === "Both"
+        );
+    }, [memos, role, user]);
 
     useEffect(() => {
         const unsubscribe = onSnapshot(
@@ -50,6 +95,7 @@ const NotificationsScreen = () => {
 
         return unsubscribe;
     }, []);
+
     const filteredAnnouncements = useMemo(() => {
         if (!user) return [];
 
@@ -203,6 +249,32 @@ const NotificationsScreen = () => {
                                 onEdit={(announcement) => {
                                     console.log("edit", announcement)
                                 }}
+                            />
+                        )}
+                        showsVerticalScrollIndicator={false}
+                    />
+                )}
+                {activeTab === "events" && (
+                    <FlatList
+                        data={events}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <EventCard
+                                memo={item}
+                                onEdit={(event) => console.log("edit", event)}
+                            />
+                        )}
+                        showsVerticalScrollIndicator={false}
+                    />
+                )}
+                {activeTab === "memos" && (
+                    <FlatList
+                        data={filteredMemos}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <MemoCard
+                                memo={item}
+                                onEdit={(memo) => console.log("edit", memo)}
                             />
                         )}
                         showsVerticalScrollIndicator={false}
