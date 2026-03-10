@@ -5,19 +5,23 @@ import { verifyFirebaseToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/by-course/:course_id", verifyFirebaseToken, async (req, res) => {
-  const { level} = req.params;
-  const { course_id } = req.params;
-  const [rows] = await db.query(
-    `SELECT cs.*, u.name AS unit_name, p.name AS lecturer_name
+router.get(
+  "/by-course/:course_id/:level",
+  verifyFirebaseToken,
+  async (req, res) => {
+    const { level } = req.params;
+    const { course_id } = req.params;
+    const [rows] = await db.query(
+      `SELECT cs.*, u.name AS unit_name,u.level AS level, p.name AS lecturer_name
      FROM class_sessions cs
      LEFT JOIN units u ON cs.unit_id = u.id
      LEFT JOIN profiles p ON cs.lecturer_id = p.id
-     WHERE cs.course_id = ? AND cs.level = ?`,
-    [course_id,level],
-  );
-  res.json(rows);
-});
+     WHERE cs.course_id = ? AND u.level = ?`,
+      [course_id, level],
+    );
+    res.json(rows);
+  },
+);
 
 // fetch sessions for a specific lecturer
 router.get("/by-lecturer/:id", verifyFirebaseToken, async (req, res) => {
