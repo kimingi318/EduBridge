@@ -78,6 +78,7 @@ export default function CreateAnnouncement({ isVisible, onClose }: Props) {
     const [units, setUnits] = useState<Unit[]>([]);
     const styles = createStyles(theme);
     const [unitName , setUnitName] = useState("");
+    
 
     const titleOptions =
         recipientType === "Lecturer"
@@ -125,6 +126,7 @@ export default function CreateAnnouncement({ isVisible, onClose }: Props) {
 
     useEffect(() => {
         if (!profile?.department_id) return;
+        
 
         setCourseValue(null);
 
@@ -245,7 +247,7 @@ export default function CreateAnnouncement({ isVisible, onClose }: Props) {
                     containerStyle={styles.dropdownContainer}
                     selectedTextStyle={styles.selectedTextStyle}
                     itemTextStyle={styles.itemTextStyle}
-                    disable={!profile.department_id}
+                    disable={!profile?.department_id}
                     onChange={(item) => {
                         setCourseValue(item.id);
                         setUnitValue(null);
