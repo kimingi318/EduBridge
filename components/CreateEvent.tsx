@@ -3,8 +3,9 @@ import { db } from "@/firebaseConfig";
 import { darkTheme, lightTheme } from "@/utils/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from 'expo-blur';
+import * as ImagePicker from "expo-image-picker";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -20,12 +21,16 @@ import {
 
 
 type Props = PropsWithChildren<{
-  isVisible: boolean;
-  onClose: () => void;
+    isVisible: boolean;
+    onClose: () => void;
 }>;
 
-export default function CreateEvent({isVisible,onClose}:Props)  {
-    const { user } = useAuth();
+const CLOUDINARY_CLOUD_NAME = "dawsvdfwm"; // From Cloudinary dashboard
+const CLOUDINARY_UPLOAD_PRESET = "edubridge-memo"; // Your unsigned preset name
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+export default function CreateEvent({ isVisible, onClose }: Props) {
+    const { user, profile } = useAuth();
     const scheme = useColorScheme();
     const theme = scheme === "dark" ? darkTheme : lightTheme;
 
@@ -34,7 +39,72 @@ export default function CreateEvent({isVisible,onClose}:Props)  {
     const [location, setLocation] = useState("");
     const [eventDate, setEventDate] = useState("");
     const [loading, setLoading] = useState(false);
+    const [imageUrl, setImageUrl] = useState("");
+    const [image, setImage] = useState<any>(null);
 
+
+    const pickImage = async () => {
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+            Alert.alert("Permission required", "We need gallery access");
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ["images"], // ✅ NEW
+            allowsEditing: true,
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setImage(result.assets[0]);
+        }
+    };
+    useEffect(() => {
+        const uploadImage = async () => {
+            if (!image) return;
+
+            try {
+                // Derive extension/MIME from uri (robust fallback)
+                const uriParts = image.uri.split('.');
+                const fileExtension = uriParts[uriParts.length - 1]?.toLowerCase() || 'jpg';
+                const mimeType = `image/${fileExtension === 'png' ? 'png' : 'jpeg'}`; // Add more types if needed
+                const fileName = image.fileName || `memo-${Date.now()}.${fileExtension}`;
+
+                const formData = new FormData();
+                formData.append('file', {
+                    uri: image.uri,
+                    type: mimeType,
+                    name: fileName,
+                } as any);
+                formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+                const response = await fetch(CLOUDINARY_UPLOAD_URL, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.log('Cloudinary error:', errorText);
+                    throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+                }
+
+                const data = await response.json();
+                setImageUrl(data.secure_url);
+                console.log('Image uploaded successfully:', data.secure_url); // Debug
+            } catch (err) {
+                console.error('Upload error:', err);
+                Alert.alert("Upload Failed", "Failed to upload image. Try again or proceed without.");
+                setImage(null); // Reset on failure
+            }
+        };
+
+        uploadImage();
+    }, [image]);
     const handleCreateEvent = async () => {
         if (!title || !description || !location || !eventDate) {
             Alert.alert("Missing Fields", "Please fill all fields");
@@ -48,8 +118,9 @@ export default function CreateEvent({isVisible,onClose}:Props)  {
                 title,
                 description,
                 location,
-                eventDate,
-                createdBy: user?.uid,
+                eventDate: new Date(eventDate),
+                imageUrl,
+                createdBy: profile?.id,
                 role: user?.role,
                 createdAt: serverTimestamp(),
             });
@@ -155,6 +226,18 @@ export default function CreateEvent({isVisible,onClose}:Props)  {
                         style={{ color: theme.text, borderColor: theme.text }}
                     />
                 </View>
+
+                <Text style={{ color: theme.text }} className="mb-1">
+                    Pick Event Image
+                </Text>
+                <TouchableOpacity
+                    onPress={pickImage}
+                    className="bg-gray-500 py-3 rounded-xl items-center mb-4"
+                >
+                    <Text className="text-white">
+                        {image ? "Change Image" : "Upload Event Image"}
+                    </Text>
+                </TouchableOpacity>
 
                 {/* Submit Button */}
                 <TouchableOpacity
