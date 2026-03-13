@@ -5,12 +5,12 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { deleteDoc, doc } from "firebase/firestore";
 import { useMemo } from "react";
 import {
-    Alert,
-    Image,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  Alert,
+  Image,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from "react-native";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 
@@ -19,7 +19,7 @@ type Event = {
   title: string;
   description: string;
   location: string;
-  eventDate: string;
+  eventDate: any;
   imageUrl: string;
   createdBy: string;
   createdAt: any;
@@ -36,31 +36,41 @@ const EventCard = ({ memo: event, onEdit }: Props) => {
   const theme = scheme === "dark" ? darkTheme : lightTheme;
 
   const isAdmin = profile?.role === "Admin";
+  const getEventDate = () => {
+    if (!event.eventDate) return null;
+
+    // Firestore Timestamp
+    if (event.eventDate?.toDate) {
+      return event.eventDate.toDate();
+    }
+
+    // Already Date
+    if (event.eventDate instanceof Date) {
+      return event.eventDate;
+    }
+
+    // String
+    return new Date(event.eventDate);
+  };
 
   // 🔥 Format Date Display
   const formattedDate = useMemo(() => {
-    try {
-      const date = new Date(event.eventDate);
-      const options: Intl.DateTimeFormatOptions = {
-        weekday: "short",
-        day: "2-digit",
-        month: "short",
-      };
-      return date.toLocaleDateString("en-US", options).toUpperCase();
-    } catch {
-      return event.eventDate;
-    }
+    const date = getEventDate();
+    if (!date) return "";
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+    };
+    return date.toLocaleDateString("en-US", options).toUpperCase();
   }, [event.eventDate]);
 
   // 🔥 Check if Event Ended
   const isEnded = useMemo(() => {
-    try {
-      const now = new Date();
-      const eventTime = new Date(event.eventDate);
-      return eventTime < now;
-    } catch {
-      return false;
-    }
+    const date = getEventDate();
+    if (!date) return false;
+    return date < new Date();
+
   }, [event.eventDate]);
 
   const handleDelete = async () => {
@@ -85,7 +95,7 @@ const EventCard = ({ memo: event, onEdit }: Props) => {
         marginBottom: hp(2),
       }}
     >
-      {/* 🔥 EVENT IMAGE */}
+      {/*  EVENT IMAGE */}
       {event.imageUrl ? (
         <Image
           source={{ uri: event.imageUrl }}
@@ -108,7 +118,7 @@ const EventCard = ({ memo: event, onEdit }: Props) => {
         </View>
       )}
 
-      {/* 🔥 CONTENT */}
+      {/*  CONTENT */}
       <View style={{ padding: hp(2) }}>
         {/* DATE */}
         <Text
@@ -139,7 +149,10 @@ const EventCard = ({ memo: event, onEdit }: Props) => {
           <Text
             style={{ color: theme.subText, marginLeft: 6 }}
           >
-            {event.eventDate}
+            {getEventDate()?.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </Text>
         </View>
 
