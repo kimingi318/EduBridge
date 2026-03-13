@@ -56,7 +56,7 @@ const HomeScreen = () => {
               <View style={{ paddingHorizontal: wp(2) }} className='flex-row items-center'>
                 <ProfileAvatar
                   imageUri={profile?.profile_image}
-                  fallbackImage={require("../../../assets/images/admin-dp.jpg")}
+                  fallbackImage={require("../../../assets/images/profileimg.jpg")}
                   dotColor="#FACC15"
                 />
                 <View>
