@@ -24,6 +24,15 @@ router.get("/by-id/:createdBy", verifyFirebaseToken, async (req, res) => {
   res.json(rows[0] || null);
 });
 
+router.get("/:id", verifyFirebaseToken, async (req, res) => {
+  const { id } = req.params;
+  const [rows] = await db.query(
+    "SELECT name, id,username,profile_image FROM profiles WHERE firebase_uid = ?",
+    [id],
+  );
+  res.json(rows);
+});
+
 router.get(
   "/by-department/:department_Id",
   verifyFirebaseToken,
