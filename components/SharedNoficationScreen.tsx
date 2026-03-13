@@ -1,6 +1,4 @@
 import AnnouncementCard from "@/components/AnnouncementCard";
-import MemoCard from "./MemoCard";
-import EventCard from "./EventCard";
 import { useAuth } from "@/context/authContext";
 import { db } from "@/firebaseConfig";
 import { darkTheme, lightTheme } from "@/utils/colors";
@@ -14,6 +12,8 @@ import CreateAnnouncement from "./CreateAnnoucement";
 import CreateEvent from "./CreateEvent";
 import CreateMemo from "./CreateMemo";
 import CreateRequest from "./CreateRequest";
+import EventCard from "./EventCard";
+import MemoCard from "./MemoCard";
 
 type TabType = "alerts" | "announcements" | "requests" | "events" | "memos";
 
@@ -24,8 +24,8 @@ const NotificationsScreen = () => {
     const { user, isAuthenticating } = useAuth();  // NEW: Pull isAuthenticating
     const role = user?.role;
     const adminTabs: TabType[] = ["alerts", "announcements", "requests", "events", "memos"];
-    const lecturerTabs: TabType[] = ["announcements", "events", "requests", "memos"];
-    const studentTabs: TabType[] = ["announcements", "events", "requests", "memos"];
+    const lecturerTabs: TabType[] = ["announcements", "events","memos", "requests" ];
+    const studentTabs: TabType[] = ["announcements", "events","memos", "requests"];
     const [isAddAnnouncementModalVisible, setIsAddAnnouncementModalVisible] = useState(false);
     const [isAddMemoModalVisible, setIsAddMemoModalVisible] = useState(false);
     const [isAddRequestModalVisible, setIsAddRequestModalVisible] = useState(false);
