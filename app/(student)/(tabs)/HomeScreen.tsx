@@ -26,14 +26,51 @@ import { blurhash } from "../../../utils/common";
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { profile } = useAuth();
+  const { profile,user } = useAuth();
   const [sessions, setSessions] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const scheme = useColorScheme();
   const theme = scheme === "dark" ? darkTheme : lightTheme;
   const [events, setEvents] = useState<any[]>([]);
   const [memos, setMemos] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [activeEventTab, setActiveEventTab] = useState<"Academic" | "Social" | "Memos">("Academic");
+
+  const getEventDate = (eventDate: any) => {
+    if (!eventDate) return null;
+
+    if (eventDate?.toDate) {
+      return eventDate.toDate();
+    }
+
+    if (eventDate instanceof Date) {
+      return eventDate;
+    }
+
+    return new Date(eventDate);
+  };
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "announcements"), (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      // 🔹 filter by role
+      const filtered = data.filter(
+        (item: any) =>
+           item.targetRole === user?.role
+      );
+
+      const sorted = filtered.sort(
+        (a: any, b: any) =>
+          (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+      );
+
+      setAnnouncements(sorted);
+    });
+    return unsubscribe;
+  }, [user?.role]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "events"), (snapshot) => {
@@ -58,15 +95,13 @@ export default function HomeScreen() {
 
     return unsubscribe;
   }, []);
-  const previewEvents = events
-    .filter((event) =>
-      activeEventTab === "Memos"
-        ? false
-        : event.category === activeEventTab
-    )
-    .slice(0, 5);
 
+  const previewEvents = events
+    .filter((event) => activeEventTab === "Memos"
+      ? false
+      : event.category === activeEventTab).slice(0, 5);
   const previewMemos = memos.slice(0, 5);
+  const previewAnnouncements = announcements.slice(0, 3);
 
   useEffect(() => {
     if (!sessions.length) {
@@ -130,7 +165,7 @@ export default function HomeScreen() {
               className="flex-row items-center ">
               <ProfileAvatar
                 imageUri={profile?.profile_image}
-                fallbackImage={require("../../../assets/images/student-dp.jpeg")}
+                fallbackImage={require("../../../assets/images/profileimg.jpg")}
                 dotColor="#22C55E"   // green
               />
               <View>
@@ -242,7 +277,11 @@ export default function HomeScreen() {
 
                     <View className="p-3">
                       <Text className="text-green-600 text-xs">
-                        {event.eventDate}
+                        {getEventDate(event.eventDate)?.toLocaleDateString("en-US", {
+                          weekday: "short",
+                          day: "2-digit",
+                          month: "short",
+                        }).toUpperCase()}
                       </Text>
 
                       <Text
@@ -252,12 +291,12 @@ export default function HomeScreen() {
                         {event.title}
                       </Text>
 
-                      <Text
-                        style={{ color: theme.subText }}
-                        className="text-sm"
-                      >
-                        {event.location}
-                      </Text>
+                      <View className="flex-row items-center mt-1">
+                        <MaterialIcons name="location-on" size={14} color={theme.subText} />
+                        <Text style={{ color: theme.subText }} className="text-sm ml-1">
+                          {event.location}
+                        </Text>
+                      </View>
                     </View>
                   </View>
                 ))}
@@ -269,24 +308,23 @@ export default function HomeScreen() {
             title="Annoucements"
             right={<Text style={{ color: theme.text }} className=" font-semibold"
               onPress={() => router.push("/NotificationScreen")}>See all</Text>} />
-          <View className=" mb-10">
-            <Memo
-              color="red"
-              title="CUSA Elections Nominee Registration"
-              subtitle="Deadline · Tuesday, 13 January, 10:00 AM"
-            />
-
-            <Memo
-              color="green"
-              title="Online Gate-Pass Acquisition"
-              subtitle="Thursday, 8 January"
-            />
-
-            <Memo
-              color="blue"
-              title="CAT Sit-in COSC 442 DSS"
-              subtitle="Wednesday, 25 February · 3:00 PM S403"
-            />
+          <View className="mb-10">
+            {previewAnnouncements.length > 0 ? (
+              previewAnnouncements.map((item) => (
+                <Memo
+                  key={item.id}
+                  color="blue"
+                  title={item.title}
+                  subtitle={
+                    item.createdAt?.seconds
+                      ? new Date(item.createdAt.seconds * 1000).toDateString()
+                      : ""
+                  }
+                />
+              ))
+            ) : (
+              <Text style={{ color: theme.subText }}>No announcements yet</Text>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -323,6 +361,7 @@ function Memo({
     </View>
   );
 }
+
 const SectionHeader = ({ title, right }: any) => {
   const scheme = useColorScheme();
   const theme = scheme === "dark" ? darkTheme : lightTheme;

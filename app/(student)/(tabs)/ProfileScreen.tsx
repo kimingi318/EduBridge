@@ -56,7 +56,7 @@ export default function ProfileScreen() {
             {/*Profile Picture */}
             <ProfileAvatar
               imageUri={profile?.profile_image}
-              fallbackImage={require("../../../assets/images/student-dp.jpeg")}
+              fallbackImage={require("../../../assets/images/profileimg.jpg")}
               dotColor="#22C55E"   // green
             />
 

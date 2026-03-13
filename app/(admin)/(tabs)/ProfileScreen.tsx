@@ -42,7 +42,7 @@ const ProfileScreen = () => {
 
             <ProfileAvatar
               imageUri={profile?.profile_image}
-              fallbackImage={require("../../../assets/images/admin-dp.jpg")}
+              fallbackImage={require("../../../assets/images/profileimg.jpg")}
               dotColor="#FACC15"
             />
             <Text className="text-white"
