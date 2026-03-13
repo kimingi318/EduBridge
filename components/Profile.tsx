@@ -31,6 +31,9 @@ type Course = {
     departmentId: string;
 };
 
+const CLOUDINARY_CLOUD_NAME = "dawsvdfwm";
+const CLOUDINARY_UPLOAD_PRESET = "edubridge-memo";
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
 export default function Profile({ isVisible, onClose }: Props) {
     const [fullName, setFullName] = useState<string>('');
@@ -38,8 +41,7 @@ export default function Profile({ isVisible, onClose }: Props) {
     const [courseName, setCourseName] = useState<string>('');
     const [level, setLevel] = useState<string>('');
     const [phoneNumber, setPhoneNumber] = useState<string>('');
-    const [selectedImage, setSelectedImage] = useState<string | undefined>(undefined);
-    const placeholder = require('@/assets/images/camera.png')
+    const placeholder = require('@/assets/images/profileimg.jpg')
     const [regNo, setRegNo] = useState<string>('')
     const [departments, setDepartments] = useState<Department[]>([]);
     const [courses, setCourses] = useState<Course[]>([]);
@@ -56,6 +58,9 @@ export default function Profile({ isVisible, onClose }: Props) {
     const styles = createStyles(theme);
     const { refreshProfile } = useAuth();
     const [profile, setProfile] = useState<any>(null);
+    const [image, setImage] = useState<string | null>(null);
+    const [localImage, setLocalImage] = useState<any>(null);
+
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -72,7 +77,7 @@ export default function Profile({ isVisible, onClose }: Props) {
                         setFullName(data.name || "");
                         setUserName(data.username || "");
                         setPhoneNumber(data.phone || "");
-                        setSelectedImage(data.profile_image || undefined);
+                        setImage(data.profile_image || null);
                     }
                 }
             } catch (err) {
@@ -130,27 +135,61 @@ export default function Profile({ isVisible, onClose }: Props) {
 
 
     const pickImageAsync = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+            Alert.alert("Permission required", "We need gallery access");
+            return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
-            quality: 1,
+            quality: 0.8,
         });
 
         if (!result.canceled) {
-            const uri = result.assets[0].uri;
-            setSelectedImage(uri);
+            setLocalImage(result.assets[0]);
         }
+    };
+    const uploadImageToCloudinary = async (imageAsset: any) => {
+        const uri = imageAsset.uri;
+        const fileType = uri.split(".").pop();
+
+        const formData = new FormData();
+
+        formData.append("file", {
+            uri,
+            type: `image/${fileType}`,
+            name: `profile_${Date.now()}.${fileType}`,
+        } as any);
+
+        formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+        const response = await fetch(CLOUDINARY_UPLOAD_URL, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error("Image upload failed");
+        }
+
+        const data = await response.json();
+
+        return data.secure_url;
     };
 
     const handleSaveProfile = async () => {
         try {
+            let uploadedImageUrl = image;
+            if (localImage) {
+              uploadedImageUrl = await uploadImageToCloudinary(localImage);
+            }
 
             const payload: any = {};
-
             if (fullName) payload.name = fullName;
             if (userName) payload.username = userName;
             if (phoneNumber) payload.phone = phoneNumber;
-            if (selectedImage) payload.profile_image = selectedImage;
+            if (image) payload.profile_image = uploadedImageUrl;
 
             if (role === "Student") {
                 if (courseName) payload.course_name = courseName;
@@ -187,7 +226,6 @@ export default function Profile({ isVisible, onClose }: Props) {
 
             if (res.ok) {
                 Alert.alert("Success", profile ? "Profile updated" : "Profile created");
-
                 await refreshProfile();
                 if (onClose) onClose();
             } else {
@@ -218,6 +256,7 @@ export default function Profile({ isVisible, onClose }: Props) {
         getUserRole();
     }, []);
     if (!role) return null;
+
     return (
         <>
             {role === "Student" && (
@@ -228,7 +267,7 @@ export default function Profile({ isVisible, onClose }: Props) {
                             <Ionicons name="person-circle-outline" size={40} color="#1E40FF" />
                         </View>
                         <Text style={styles.header} className=" font-bold">Complete Your Profile</Text>
-                        <Text style={{ color: theme.subText, fontSize: hp(2),textAlign: "center" }}>
+                        <Text style={{ color: theme.subText, fontSize: hp(2), textAlign: "center" }}>
                             Help classmates and lecturers recognize you easily
                         </Text>
                     </View>
@@ -237,12 +276,12 @@ export default function Profile({ isVisible, onClose }: Props) {
                         height: hp(15),
                         borderRadius: hp(4),
                         marginBottom: hp(2),
-                        backgroundColor:theme.surface
+                        backgroundColor: theme.surface
                     }}>
                         <TouchableOpacity onPress={pickImageAsync} className="items-center flex-row gap-4">
-                            <ImageViewer imgSource={placeholder} selectedImage={selectedImage} />
+                            <ImageViewer imgSource={placeholder} selectedImage={image}  localImage={localImage}/>
                             <View className='flex-1'>
-                                <Text style={{ fontSize: hp(3), fontWeight: 'bold',color: theme.text }}
+                                <Text style={{ fontSize: hp(3), fontWeight: 'bold', color: theme.text }}
                                     className="mt-1">
                                     Tap
                                 </Text>
@@ -324,7 +363,7 @@ export default function Profile({ isVisible, onClose }: Props) {
                             <Ionicons name="person-circle-outline" size={40} color="#1E40FF" />
                         </View>
                         <Text style={[styles.header, { color: theme.text }]}>Complete Your Profile</Text>
-                        <Text style={{ color: theme.subText, fontSize: hp(1.8),textAlign: "center" }}>
+                        <Text style={{ color: theme.subText, fontSize: hp(1.8), textAlign: "center" }}>
                             Help Students and lecturers recognize you easily
                         </Text>
                     </View>
@@ -336,7 +375,7 @@ export default function Profile({ isVisible, onClose }: Props) {
                         backgroundColor: theme.surface
                     }}>
                         <TouchableOpacity onPress={pickImageAsync} className="items-center flex-row  gap-4">
-                            <ImageViewer imgSource={placeholder} selectedImage={selectedImage} />
+                            <ImageViewer imgSource={placeholder} selectedImage={image}  localImage={localImage} />
                             <View className='flex-1'>
                                 <Text style={{ fontSize: hp(3), fontWeight: 'bold', color: theme.text }} className=" mt-1">Tap</Text>
                                 <Text style={{ fontSize: hp(2), fontWeight: 'semibold' }} className="text-edublue  mt-1">Add profile image</Text>
@@ -422,7 +461,8 @@ export default function Profile({ isVisible, onClose }: Props) {
                         >
                             <ImageViewer
                                 imgSource={placeholder}
-                                selectedImage={selectedImage}
+                                selectedImage={image}
+                                 localImage={localImage}
                             />
                             <View className="flex-1">
                                 <Text
