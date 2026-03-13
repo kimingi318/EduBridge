@@ -45,7 +45,8 @@ export function RootLayout() {
     const inApp =
       segments[0] === "(admin)" ||
       segments[0] === "(lecturer)" ||
-      segments[0] === "(student)";
+      segments[0] === "(student)"||
+      segments[0] === "(shared)";
 
     // 🔹 No user → go to SignIn
     if (!user) {
