@@ -1,6 +1,6 @@
 import LottieView from 'lottie-react-native';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 interface loadingProps {
     size?: number;
 }
@@ -15,5 +15,3 @@ const Loading: React.FC<loadingProps> = ({size}) => {
 }
 
 export default Loading
-
-const styles = StyleSheet.create({})
