@@ -4,11 +4,18 @@ import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-nat
 
 type Props = {
     imgSource: ImageSourcePropType;
-    selectedImage? : string;
+    selectedImage? : string | null;
+    localImage?: any;
 };
 
-export default function ImageViewer({ imgSource,selectedImage }: Props) {
-    const imageSource = selectedImage ? { uri: selectedImage}: imgSource
+export default function ImageViewer({ imgSource,selectedImage,localImage }: Props) {
+    let imageSource = imgSource
+    if(localImage){
+        imageSource = { uri: localImage.uri};
+    } else if ( selectedImage){
+        imageSource = { uri: selectedImage};
+    }
+    
     return <Image source={imageSource} style={{ 
         width: wp(24), 
         height: hp(12),
