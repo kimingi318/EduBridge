@@ -1,19 +1,18 @@
-import React from "react";
-import { View, Image, ImageSourcePropType } from "react-native";
+import { Image, ImageSourcePropType, View } from "react-native";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 
 type Props = {
   imageUri?: string | null;
   fallbackImage: ImageSourcePropType;
   dotColor?: string;
-  size?: number; // optional size control
+  size?: number; 
 };
 
 export default function ProfileAvatar({
   imageUri,
   fallbackImage,
   dotColor ,
-  size = 10, // default hp(10)
+  size = 10, 
 }: Props) {
   return (
     <View className="relative" style={{ marginRight: hp(2) }}>
